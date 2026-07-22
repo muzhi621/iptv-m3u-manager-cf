@@ -24,16 +24,8 @@ app.route('/', api);
 // M3U export routes (public)
 app.route('/', m3u);
 
-// Fallback - serve frontend assets
-app.get('*', async (c) => {
-  // Try to serve static assets from Workers Assets
-  const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
-  if (assetResponse.status === 200) return assetResponse;
-
-  // Fallback to index.html for SPA routing
-  const indexResponse = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
-  if (indexResponse.status === 200) return indexResponse;
-
+// Fallback - return 404 for unknown routes
+app.notFound((c) => {
   return c.json({ success: false, error: 'Not found' }, 404);
 });
 

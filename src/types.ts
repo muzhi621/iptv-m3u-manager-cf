@@ -2,7 +2,6 @@ export interface Env {
   DB: D1Database;
   CACHE: KVNamespace;
   STORAGE: R2Bucket;
-  ASSETS: { fetch: FetchFunction };
   ADMIN_PASSWORD: string;
   COOKIE_SECRET: string;
   DEFAULT_SOURCES?: string;
