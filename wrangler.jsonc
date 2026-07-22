@@ -1,0 +1,56 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "iptv-m3u-manager",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-09-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "env": {
+    "production": {
+      "vars": {
+        "ADMIN_PASSWORD": "changeme",
+        "COOKIE_SECRET": "changeme-cookie-secret"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "iptv_db",
+          "database_id": "placeholder-replace-with-real-id"
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "CACHE",
+          "id": "placeholder-replace-with-real-id"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "STORAGE",
+          "bucket_name": "iptv-storage"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "TASK_QUEUE",
+            "queue": "iptv-tasks"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "iptv-tasks",
+            "max_retries": 3,
+            "dead_letter_queue": "iptv-tasks-dlq"
+          }
+        ]
+      }
+    }
+  },
+  "triggers": {
+    "crons": ["0 */6 * * *"]
+  }
+}

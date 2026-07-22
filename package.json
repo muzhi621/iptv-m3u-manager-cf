@@ -1,0 +1,26 @@
+{
+  "name": "iptv-m3u-manager-cf",
+  "version": "1.0.0",
+  "description": "IPTV M3U Manager - Cloudflare Native Serverless Edition",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute iptv_db --file=./migrations/init.sql",
+    "db:init:local": "wrangler d1 execute iptv_db --local --file=./migrations/init.sql",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.4.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240806.0",
+    "typescript": "^5.5.0",
+    "wrangler": "^3.70.0",
+    "vitest": "^2.0.0",
+    "@cloudflare/vitest-pool-workers": "^0.4.0"
+  }
+}
