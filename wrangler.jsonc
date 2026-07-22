@@ -10,21 +10,18 @@
   },
   "env": {
     "production": {
-      "vars": {
-        "ADMIN_PASSWORD": "changeme",
-        "COOKIE_SECRET": "changeme-cookie-secret"
-      },
+      "vars": {},
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "iptv_db",
-          "database_id": "placeholder-replace-with-real-id"
+          "database_id": "2ae7c6be-c2c8-4a26-90a5-1dd8f5f493bb"
         }
       ],
       "kv_namespaces": [
         {
           "binding": "CACHE",
-          "id": "placeholder-replace-with-real-id"
+          "id": "75da3b309d984fbead2bdf28c0c77b56"
         }
       ],
       "r2_buckets": [
