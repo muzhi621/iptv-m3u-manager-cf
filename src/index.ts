@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import type { Env } from './types';
 import api from './routes/api';
 import auth from './routes/auth';
+import { INDEX_HTML } from './frontend/index';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -13,6 +14,11 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Cookie'],
   credentials: true,
 }));
+
+// Serve frontend
+app.get('/', (c) => {
+  return c.html(INDEX_HTML);
+});
 
 // Auth routes
 app.route('/', auth);
