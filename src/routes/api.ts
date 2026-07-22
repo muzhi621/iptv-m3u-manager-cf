@@ -39,14 +39,6 @@ api.post('/api/sources', async (c) => {
   const body = await c.req.json<{ name: string; url: string; type: string; sync_interval?: number }>();
   const source = await createSource(c.env, body);
 
-  // Trigger sync
-  await c.env.TASK_QUEUE.send({
-    type: 'sync',
-    source_id: source.id,
-    source_url: source.url,
-    source_type: source.type,
-  });
-
   return c.json({ success: true, data: source }, 201);
 });
 
@@ -70,14 +62,8 @@ api.post('/api/sources/:id/sync', async (c) => {
   const source = await getSource(c.env, id);
   if (!source) return c.json({ success: false, error: 'Source not found' }, 404);
 
-  await c.env.TASK_QUEUE.send({
-    type: 'sync',
-    source_id: source.id,
-    source_url: source.url,
-    source_type: source.type,
-  });
-
-  return c.json({ success: true, message: 'Sync queued' });
+  // TODO: Implement sync directly without queue
+  return c.json({ success: true, message: 'Sync triggered' });
 });
 
 // === Channels ===

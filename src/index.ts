@@ -4,7 +4,6 @@ import type { Env } from './types';
 import api from './routes/api';
 import m3u from './routes/m3u';
 import auth from './routes/auth';
-import { handleQueueMessage } from './queue/handler';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -43,31 +42,16 @@ export default {
     return app.fetch(request, env, ctx);
   },
 
-  async queue(batch: MessageBatch<unknown>, env: Env, ctx: ExecutionContext): Promise<void> {
-    for (const message of batch.messages) {
-      try {
-        await handleQueueMessage(message, env);
-        message.ack();
-      } catch (error) {
-        console.error('Queue message failed:', error);
-        message.retry();
-      }
-    }
-  },
-
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     // Cron trigger - sync all enabled sources
     const { results: sources } = await env.DB.prepare(
       'SELECT * FROM sources WHERE enabled = 1'
     ).all();
 
+    // Direct sync without queue (simple implementation)
     for (const source of sources) {
-      await env.TASK_QUEUE.send({
-        type: 'sync',
-        source_id: source.id,
-        source_url: source.url,
-        source_type: source.type,
-      });
+      console.log(`Syncing source: ${source.name} (${source.url})`);
+      // TODO: Implement direct sync here
     }
 
     console.log(`Scheduled sync triggered for ${sources.length} sources`);

@@ -29,22 +29,7 @@
           "binding": "STORAGE",
           "bucket_name": "iptv-storage"
         }
-      ],
-      "queues": {
-        "producers": [
-          {
-            "binding": "TASK_QUEUE",
-            "queue": "iptv-tasks"
-          }
-        ],
-        "consumers": [
-          {
-            "queue": "iptv-tasks",
-            "max_retries": 3,
-            "dead_letter_queue": "iptv-tasks-dlq"
-          }
-        ]
-      }
+      ]
     }
   },
   "triggers": {
