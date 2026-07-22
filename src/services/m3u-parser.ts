@@ -4,6 +4,11 @@ export function parseM3U(content: string): M3UPlaylist {
   const lines = content.split(/\r?\n/);
   const channels: M3UChannel[] = [];
 
+  // Check if it's TXT format (grouped by genre)
+  if (content.includes('#genre#')) {
+    return parseTxt(content);
+  }
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line.startsWith('#EXTINF:')) continue;
@@ -27,10 +32,56 @@ export function parseM3U(content: string): M3UPlaylist {
   return { channels, raw: content };
 }
 
+function parseTxt(content: string): M3UPlaylist {
+  const lines = content.split(/\r?\n/);
+  const channels: M3UChannel[] = [];
+  let currentGroup = 'Default';
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // Group header: "组名,#genre#"
+    if (trimmed.endsWith('#genre#')) {
+      currentGroup = trimmed.replace(/,#genre#$/, '').trim();
+      continue;
+    }
+
+    // Channel line: "名称,URL" or "名称#URL"
+    const commaMatch = trimmed.match(/^(.+?)[,#](https?:\/\/.+)$/);
+    if (commaMatch) {
+      channels.push({
+        name: commaMatch[1].trim(),
+        tvg_id: '',
+        tvg_name: commaMatch[1].trim(),
+        tvg_logo: '',
+        tvg_chno: '',
+        group_title: currentGroup,
+        url: commaMatch[2].trim(),
+      });
+      continue;
+    }
+
+    // Pure URL
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      channels.push({
+        name: trimmed.split('/').pop() || 'Unknown',
+        tvg_id: '',
+        tvg_name: '',
+        tvg_logo: '',
+        tvg_chno: '',
+        group_title: currentGroup,
+        url: trimmed,
+      });
+    }
+  }
+
+  return { channels, raw: content };
+}
+
 function parseExtInf(line: string): Partial<M3UChannel> {
   const result: Partial<M3UChannel> = {};
 
-  // Extract attributes from quotes: tvg-id="xxx", tvg-name="xxx", etc.
   const attrRegex = /([\w-]+)="([^"]*)"/g;
   let match;
   while ((match = attrRegex.exec(line)) !== null) {
@@ -44,7 +95,6 @@ function parseExtInf(line: string): Partial<M3UChannel> {
     }
   }
 
-  // Extract channel name after the last comma
   const commaIdx = line.lastIndexOf(',');
   if (commaIdx !== -1) {
     result.name = line.substring(commaIdx + 1).trim();

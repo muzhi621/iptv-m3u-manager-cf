@@ -1,35 +1,48 @@
-import type { Env, EpgSource } from '../types';
+import type { Env } from '../types';
 
-export async function listEpgSources(env: Env): Promise<EpgSource[]> {
-  const { results } = await env.DB.prepare('SELECT * FROM epg_sources ORDER BY id').all<EpgSource>();
-  return results;
+export interface EpgProgram {
+  channel_name: string;
+  channel_id: string;
+  start: string;
+  end: string;
+  title: string;
+  description: string;
 }
 
-export async function createEpgSource(
+export async function getCurrentProgram(
   env: Env,
-  data: { name: string; url: string }
-): Promise<EpgSource> {
-  const result = await env.DB.prepare(
-    'INSERT INTO epg_sources (name, url) VALUES (?, ?)'
-  )
-    .bind(data.name, data.url)
-    .run();
+  channelId: number
+): Promise<{ title: string; start: string; end: string } | null> {
+  const channel = await env.DB.prepare('SELECT tvg_name, tvg_id FROM channels WHERE id = ?')
+    .bind(channelId).first<{ tvg_name: string; tvg_id: string }>();
 
-  return (await env.DB.prepare('SELECT * FROM epg_sources WHERE id = ?')
-    .bind(result.meta.last_row_id).first<EpgSource>())!;
+  if (!channel) return null;
+
+  // Check KV cache for EPG data
+  const cacheKey = `epg:${channel.tvg_name || channel.tvg_id}`;
+  const cached = await env.CACHE.get(cacheKey, { type: 'json' }) as EpgProgram[] | null;
+
+  if (!cached) return null;
+
+  const now = new Date().toISOString();
+  const current = cached.find((p) => p.start <= now && p.end >= now);
+  if (!current) return null;
+
+  return {
+    title: current.title,
+    start: current.start,
+    end: current.end,
+  };
 }
 
-export async function deleteEpgSource(env: Env, id: number): Promise<boolean> {
-  const result = await env.DB.prepare('DELETE FROM epg_sources WHERE id = ?').bind(id).run();
-  return result.meta.changes > 0;
-}
-
-export async function syncEpgSource(env: Env, id: number): Promise<{ success: boolean; message: string }> {
-  const source = await env.DB.prepare('SELECT * FROM epg_sources WHERE id = ?')
-    .bind(id).first<EpgSource>();
-
-  if (!source) return { success: false, message: 'EPG source not found' };
-
-  // TODO: Implement EPG sync directly
-  return { success: true, message: 'EPG sync triggered' };
+export async function batchMatchEpg(
+  env: Env,
+  channelIds: number[]
+): Promise<{ matched: number; total: number }> {
+  let matched = 0;
+  for (const id of channelIds) {
+    const result = await getCurrentProgram(env, id);
+    if (result) matched++;
+  }
+  return { matched, total: channelIds.length };
 }

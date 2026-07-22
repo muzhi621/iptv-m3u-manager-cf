@@ -9,71 +9,96 @@ export interface Env {
   FFMPEG_TIMEOUT?: string;
 }
 
-export interface FetchFunction {
-  fetch(request: Request): Promise<Response>;
-}
+// === Database Models ===
 
-// Database models
-export interface Source {
+export interface Subscription {
   id: number;
   name: string;
   url: string;
-  type: 'm3u' | 'txt' | 'github';
-  enabled: number;
-  sync_interval: number;
-  last_sync_at: string | null;
+  user_agent: string;
+  headers: string;
+  last_updated: string | null;
+  last_update_status: string;
+  auto_update_minutes: number;
+  is_enabled: number;
+  epg_url: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Channel {
   id: number;
-  source_id: number;
+  subscription_id: number;
   name: string;
-  tvg_name: string;
-  tvg_id: string;
-  tvg_logo: string;
-  group_title: string;
   url: string;
-  tvg_chno: string;
-  enabled: number;
-  status: 'unknown' | 'ok' | 'error';
-  last_check_at: string | null;
-  screenshot_url: string | null;
+  "group": string;
+  logo: string;
+  tvg_id: string;
+  tvg_name: string;
+  is_enabled: number;
+  check_status: number;
+  check_date: string | null;
+  check_image: string;
+  check_error: string;
+  check_source: string;
+  ai_visual_status: string;
+  ai_visual_detail: string;
+  ai_visual_date: string | null;
+  created_at: string;
+}
+
+export interface OutputSource {
+  id: number;
+  name: string;
+  slug: string;
+  epg_url: string;
+  include_source_suffix: number;
+  filter_regex: string;
+  keywords: string;
+  subscription_ids: string;
+  excluded_channel_ids: string;
+  last_updated: string | null;
+  last_update_status: string;
+  last_request_time: string | null;
+  is_enabled: number;
+  auto_update_minutes: number;
+  auto_visual_check: number;
+  auto_disable_on_check: number;
+  auto_ai_vision_check: number;
+  auto_ai_organize: number;
+  enable_ai_vision: number;
+  enable_ai_organize: number;
+  ai_organize_prompt: string;
+  ai_vision_prompt: string;
+  layout_mode: string;
+  channel_layout: string;
+  layout_meta: string;
+  preview_cache_key: string;
+  preview_cache_json: string;
+  preview_cache_at: string | null;
+  member_total: number;
+  member_enabled: number;
+  member_disabled: number;
+  created_at: string;
+}
+
+export interface AppSettings {
+  id: number;
+  llm_text_json: string;
+  llm_vision_json: string;
+  access_password_enabled: number;
+  access_password_hash: string;
+}
+
+export interface TaskRecord {
+  id: string;
+  name: string;
+  status: string;
+  progress: number;
+  message: string;
   created_at: string;
   updated_at: string;
-}
-
-export interface Group {
-  id: number;
-  name: string;
-  display_name: string;
-  sort_order: number;
-  auto_created: number;
-  created_at: string;
-}
-
-export interface FilterRule {
-  id: number;
-  name: string;
-  type: 'include' | 'exclude';
-  pattern: string;
-  is_regex: number;
-  enabled: number;
-  target: 'name' | 'group' | 'url';
-  created_at: string;
-}
-
-export interface Task {
-  id: number;
-  type: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  params: string;
-  result: string | null;
-  error: string | null;
-  created_at: string;
-  started_at: string | null;
-  completed_at: string | null;
+  result: string;
+  is_shown: number;
 }
 
 export interface EpgSource {
@@ -85,12 +110,8 @@ export interface EpgSource {
   created_at: string;
 }
 
-export interface SystemConfig {
-  key: string;
-  value: string;
-}
+// === M3U Types ===
 
-// M3U types
 export interface M3UChannel {
   name: string;
   tvg_id: string;
@@ -106,13 +127,7 @@ export interface M3UPlaylist {
   raw: string;
 }
 
-// API types
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  page_size: number;
-}
+// === API Types ===
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -120,11 +135,11 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 
-// Task queue types
+// === Task Queue Types ===
+
 export interface SyncTaskPayload {
-  source_id: number;
-  source_url: string;
-  source_type: 'm3u' | 'txt' | 'github';
+  subscription_id: number;
+  subscription_url: string;
 }
 
 export interface DetectTaskPayload {
@@ -132,7 +147,10 @@ export interface DetectTaskPayload {
   channel_url: string;
 }
 
-export interface SnapshotTaskPayload {
-  channel_id: number;
-  channel_url: string;
+// === Keyword Rule ===
+
+export interface KeywordRule {
+  value: string;
+  group: string;
+  match_by: "name" | "source_group";
 }
