@@ -9,6 +9,7 @@ import { getCurrentProgram, batchMatchEpg } from '../handlers/epg';
 import { parseM3U, generateM3U } from '../services/m3u-parser';
 import { cacheGet, cacheSet, cacheFlush } from '../utils/cache';
 import { checkUrl } from '../services/connectivity';
+import { aiGroup, aiSort, aiVisionCheck } from '../handlers/ai';
 
 const api = new Hono<{ Bindings: Env }>();
 
@@ -396,6 +397,25 @@ api.get('/api/preview/cache/refresh', async (c) => {
   await cacheFlush(c.env, 'preview:');
   await cacheFlush(c.env, 'm3u:');
   return c.json({ success: true, message: 'Cache refreshed' });
+});
+
+// === AI ===
+api.post('/api/ai/group', async (c) => {
+  const body = await c.req.json<{ output_id: number; prompt?: string }>();
+  const result = await aiGroup(c.env, body.output_id, body.prompt);
+  return c.json(result);
+});
+
+api.post('/api/ai/sort', async (c) => {
+  const body = await c.req.json<{ output_id: number; prompt?: string }>();
+  const result = await aiSort(c.env, body.output_id, body.prompt);
+  return c.json(result);
+});
+
+api.post('/api/ai/detect', async (c) => {
+  const body = await c.req.json<{ output_id: number; channel_ids?: number[] }>();
+  const result = await aiVisionCheck(c.env, body.output_id, body.channel_ids);
+  return c.json(result);
 });
 
 export default api;
