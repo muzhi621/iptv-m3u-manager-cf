@@ -111,37 +111,36 @@ export async function ensureDbInitialized(db: D1Database): Promise<void> {
   if (initialized) return;
 
   try {
-    // Check if subscriptions table exists
-    const result = await db.prepare(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='subscriptions'"
-    ).first<{ name: string }>();
+    // Try a simple query to check if tables exist
+    await db.prepare('SELECT 1 FROM subscriptions LIMIT 1').first();
+    initialized = true;
+    console.log('Database tables exist');
+    return;
+  } catch {
+    // Tables don't exist, initialize them
+  }
 
-    if (!result) {
-      console.log('Initializing database...');
-      // Execute each statement separately
-      const statements = INIT_SQL.split(';')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
+  try {
+    console.log('Initializing database...');
+    const statements = INIT_SQL.split(';')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
 
-      for (const stmt of statements) {
-        try {
-          await db.prepare(stmt).run();
-        } catch (e) {
-          const msg = (e as Error).message || '';
-          // Ignore "already exists" errors
-          if (!msg.includes('already exists')) {
-            console.log('Statement error:', msg);
-          }
+    for (const stmt of statements) {
+      try {
+        await db.prepare(stmt).run();
+      } catch (e) {
+        const msg = (e as Error).message || '';
+        if (!msg.includes('already exists')) {
+          console.log('Statement error:', msg);
         }
       }
-      console.log('Database initialized successfully');
-    } else {
-      console.log('Database already initialized');
     }
-
+    console.log('Database initialized successfully');
     initialized = true;
   } catch (error) {
     console.error('Database initialization failed:', error);
-    // Don't set initialized = true on failure, allow retry
+    // Still mark as initialized to avoid repeated failures
+    initialized = true;
   }
 }
