@@ -5,6 +5,7 @@ import api from './routes/api';
 import auth from './routes/auth';
 import { INDEX_HTML } from './frontend/index';
 import { handleWebSocketUpgrade, getConnectionCount } from './services/websocket';
+import { ensureDbInitialized } from './db/init';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -15,6 +16,12 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Cookie'],
   credentials: true,
 }));
+
+// Auto-initialize database on first request
+app.use('*', async (c, next) => {
+  await ensureDbInitialized(c.env.DB);
+  return next();
+});
 
 // Serve frontend
 app.get('/', (c) => {
