@@ -47,7 +47,7 @@ app.notFound((c) => {
 // Error handler
 app.onError((err, c) => {
   console.error('Worker error:', err);
-  return c.json({ success: false, error: 'Internal server error' }, 500);
+  return c.json({ success: false, error: err.message || 'Internal server error' }, 500);
 });
 
 export default {

@@ -127,15 +127,21 @@ export async function ensureDbInitialized(db: D1Database): Promise<void> {
         try {
           await db.prepare(stmt).run();
         } catch (e) {
-          // Ignore errors for individual statements (e.g., index already exists)
-          console.log('Statement skipped:', (e as Error).message);
+          const msg = (e as Error).message || '';
+          // Ignore "already exists" errors
+          if (!msg.includes('already exists')) {
+            console.log('Statement error:', msg);
+          }
         }
       }
       console.log('Database initialized successfully');
+    } else {
+      console.log('Database already initialized');
     }
 
     initialized = true;
   } catch (error) {
     console.error('Database initialization failed:', error);
+    // Don't set initialized = true on failure, allow retry
   }
 }

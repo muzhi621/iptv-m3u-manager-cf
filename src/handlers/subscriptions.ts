@@ -1,8 +1,13 @@
 import type { Env, Subscription } from '../types';
 
 export async function listSubscriptions(env: Env): Promise<Subscription[]> {
-  const { results } = await env.DB.prepare('SELECT * FROM subscriptions ORDER BY id').all<Subscription>();
-  return results;
+  try {
+    const { results } = await env.DB.prepare('SELECT * FROM subscriptions ORDER BY id').all<Subscription>();
+    return results || [];
+  } catch (error) {
+    console.error('listSubscriptions error:', error);
+    throw new Error(`Database error: ${(error as Error).message}`);
+  }
 }
 
 export async function getSubscription(env: Env, id: number): Promise<Subscription | null> {
