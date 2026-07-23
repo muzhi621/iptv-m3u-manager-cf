@@ -20,13 +20,23 @@ auth.post('/api/auth/login', async (c) => {
   const token = createSessionToken(c.env);
   const cookie = setSessionCookie(token);
 
-  c.header('Set-Cookie', cookie);
-  return c.json({ success: true });
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Set-Cookie': cookie,
+    },
+  });
 });
 
 auth.post('/api/auth/logout', async (c) => {
-  c.header('Set-Cookie', clearSessionCookie());
-  return c.json({ success: true });
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Set-Cookie': clearSessionCookie(),
+    },
+  });
 });
 
 auth.get('/api/auth/status', async (c) => {
