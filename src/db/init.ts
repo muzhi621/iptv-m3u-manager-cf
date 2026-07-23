@@ -108,7 +108,13 @@ INSERT OR IGNORE INTO app_settings (id) VALUES (1);
 let initialized = false;
 
 export async function ensureDbInitialized(db: D1Database): Promise<void> {
+  console.log('DB binding type:', typeof db, 'is null:', db === null, 'is undefined:', db === undefined);
   if (initialized) return;
+
+  if (!db) {
+    console.error('DB binding is undefined! Check wrangler.jsonc D1 configuration.');
+    return;
+  }
 
   try {
     // Try a simple query to check if tables exist

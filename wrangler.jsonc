@@ -4,30 +4,25 @@
   "main": "src/index.ts",
   "compatibility_date": "2024-09-25",
   "compatibility_flags": ["nodejs_compat"],
-  "env": {
-    "production": {
-      "vars": {},
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "iptv_db",
-          "database_id": "2ae7c6be-c2c8-4a26-90a5-1dd8f5f493bb"
-        }
-      ],
-      "kv_namespaces": [
-        {
-          "binding": "CACHE",
-          "id": "75da3b309d984fbead2bdf28c0c77b56"
-        }
-      ],
-      "r2_buckets": [
-        {
-          "binding": "STORAGE",
-          "bucket_name": "iptv-storage"
-        }
-      ]
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "iptv_db",
+      "database_id": "2ae7c6be-c2c8-4a26-90a5-1dd8f5f493bb"
     }
-  },
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "75da3b309d984fbead2bdf28c0c77b56"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "STORAGE",
+      "bucket_name": "iptv-storage"
+    }
+  ],
   "triggers": {
     "crons": ["0 */6 * * *"]
   }
