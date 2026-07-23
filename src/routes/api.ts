@@ -5,7 +5,7 @@ import { listSubscriptions, getSubscription, createSubscription, updateSubscript
 import { listOutputSources, getOutputSource, createOutputSource, updateOutputSource, deleteOutputSource, aggregateChannels, filterChannels, updateMemberStats } from '../handlers/outputs';
 import { getSettings, updateLlmTextConfig, updateLlmVisionConfig, updateAccessPassword, maskApiKey } from '../handlers/settings';
 import { listTasks, getTask, createTask, updateTask, deleteTask, cleanupTasks } from '../handlers/tasks';
-import { getCurrentProgram, batchMatchEpg } from '../handlers/epg';
+import { getCurrentProgram, batchMatchEpg, syncEpgSources, getEpgSourcesInfo } from '../handlers/epg';
 import { parseM3U, generateM3U } from '../services/m3u-parser';
 import { cacheGet, cacheSet, cacheFlush } from '../utils/cache';
 import { checkUrl } from '../services/connectivity';
@@ -337,6 +337,17 @@ api.post('/api/epg/batch', async (c) => {
   const body = await c.req.json<{ channel_ids: number[] }>();
   const result = await batchMatchEpg(c.env, body.channel_ids);
   return c.json({ success: true, data: result });
+});
+
+api.get('/api/epg/sources', async (c) => {
+  const sources = await getEpgSourcesInfo(c.env);
+  return c.json({ success: true, data: sources });
+});
+
+api.post('/api/epg/sync', async (c) => {
+  const body = await c.req.json<{ output_id: number }>();
+  const result = await syncEpgSources(c.env, body.output_id);
+  return c.json(result);
 });
 
 // === Tools ===
