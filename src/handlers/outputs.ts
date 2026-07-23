@@ -1,4 +1,5 @@
 import type { Env, OutputSource, Channel } from '../types';
+import { applyChannelOverlays, findSameChannelClusters } from '../services/channel-overlay';
 
 export async function listOutputSources(env: Env): Promise<OutputSource[]> {
   const { results } = await env.DB.prepare('SELECT * FROM output_sources ORDER BY id').all<OutputSource>();
@@ -142,4 +143,25 @@ function generateSlug(name: string): string {
     .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
     .replace(/^-|-$/g, '')
     || `output-${Date.now()}`;
+}
+
+// === Channel Overlay ===
+
+export function getOverlayStats(channels: Channel[], channelLayout: string = '{}') {
+  const clusters = findSameChannelClusters(channels);
+  return {
+    clusters: clusters.length,
+    totalChannels: channels.length,
+    clusterDetails: clusters.map((c) => ({
+      ids: c.ids,
+      count: c.ids.length,
+    })),
+  };
+}
+
+export function applyOverlaysToChannels(
+  channels: Channel[],
+  channelLayout: string = '{}'
+): Channel[] {
+  return applyChannelOverlays(channels, channelLayout).channels;
 }

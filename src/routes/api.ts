@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from '../types';
 import { isAuthenticated } from '../utils/auth';
 import { listSubscriptions, getSubscription, createSubscription, updateSubscription, deleteSubscription, getSubscriptionChannels } from '../handlers/subscriptions';
-import { listOutputSources, getOutputSource, createOutputSource, updateOutputSource, deleteOutputSource, aggregateChannels, filterChannels, updateMemberStats } from '../handlers/outputs';
+import { listOutputSources, getOutputSource, createOutputSource, updateOutputSource, deleteOutputSource, aggregateChannels, filterChannels, updateMemberStats, getOverlayStats, applyOverlaysToChannels } from '../handlers/outputs';
 import { getSettings, updateLlmTextConfig, updateLlmVisionConfig, updateAccessPassword, maskApiKey } from '../handlers/settings';
 import { listTasks, getTask, createTask, updateTask, deleteTask, cleanupTasks } from '../handlers/tasks';
 import { getCurrentProgram, batchMatchEpg, syncEpgSources, getEpgSourcesInfo } from '../handlers/epg';
@@ -277,6 +277,18 @@ api.post('/outputs/:id/layout-mode', async (c) => {
   return c.json({ success: true, data: output });
 });
 
+api.get('/outputs/:id/overlay-stats', async (c) => {
+  const id = Number(c.req.param('id'));
+  const output = await getOutputSource(c.env, id);
+  if (!output) return c.json({ success: false, error: 'Output source not found' }, 404);
+
+  const allChannels = await aggregateChannels(c.env, output);
+  const filtered = await filterChannels(allChannels, output);
+  const stats = getOverlayStats(filtered, output.channel_layout || '{}');
+
+  return c.json({ success: true, data: stats });
+});
+
 // === M3U Export (Public) ===
 api.get('/m3u/:slug', async (c) => {
   const slug = c.req.param('slug');
@@ -303,7 +315,10 @@ api.get('/m3u/:slug', async (c) => {
   const allChannels = await aggregateChannels(c.env, output);
   const filtered = await filterChannels(allChannels, output);
 
-  const m3uChannels = filtered.map((ch) => ({
+  // Apply channel overlays (logo + tvg-name)
+  const overlaidChannels = applyOverlaysToChannels(filtered, output.channel_layout || '{}');
+
+  const m3uChannels = overlaidChannels.map((ch) => ({
     name: ch.name,
     tvg_id: ch.tvg_id,
     tvg_name: ch.tvg_name || ch.name,
