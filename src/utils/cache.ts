@@ -26,6 +26,8 @@ export async function cacheDelete(env: Env, key: string): Promise<void> {
 export async function cacheFlush(env: Env, prefix: string): Promise<void> {
   const list = await env.CACHE.list({ prefix: CACHE_PREFIX + prefix });
   if (list.keys.length > 0) {
-    await env.CACHE.delete(list.keys.map((k) => k.name));
+    for (const key of list.keys) {
+      await env.CACHE.delete(key.name);
+    }
   }
 }

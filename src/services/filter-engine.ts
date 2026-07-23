@@ -1,9 +1,11 @@
-import type { M3UChannel, FilterRule } from '../types';
+import type { M3UChannel, Channel, FilterRule } from '../types';
+
+type FilterableChannel = M3UChannel | Channel;
 
 export function applyFilters(
-  channels: M3UChannel[],
+  channels: FilterableChannel[],
   rules: FilterRule[]
-): M3UChannel[] {
+): FilterableChannel[] {
   const activeRules = rules.filter((r) => r.enabled);
   if (activeRules.length === 0) return channels;
 
@@ -30,10 +32,10 @@ export function applyFilters(
   });
 }
 
-function getTargetValue(ch: M3UChannel, target: string): string {
+function getTargetValue(ch: FilterableChannel, target: string): string {
   switch (target) {
     case 'name': return ch.name;
-    case 'group': return ch.group_title;
+    case 'group': return 'group_title' in ch ? ch.group_title : ch["group"];
     case 'url': return ch.url;
     default: return ch.name;
   }

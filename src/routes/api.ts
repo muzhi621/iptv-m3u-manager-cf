@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from '../types';
 import { isAuthenticated } from '../utils/auth';
 import { listSubscriptions, getSubscription, createSubscription, updateSubscription, deleteSubscription, getSubscriptionChannels } from '../handlers/subscriptions';
-import { listOutputSources, getOutputSource, createOutputSource, updateOutputSource, deleteOutputSource, aggregateChannels, filterChannels, updateMemberStats, getOverlayStats, applyOverlaysToChannels } from '../handlers/outputs';
+import { listOutputSources, getOutputSource, getOutputSourceBySlug, createOutputSource, updateOutputSource, deleteOutputSource, aggregateChannels, filterChannels, updateMemberStats, getOverlayStats, applyOverlaysToChannels } from '../handlers/outputs';
 import { getSettings, updateLlmTextConfig, updateLlmVisionConfig, updateAccessPassword, maskApiKey } from '../handlers/settings';
 import { listTasks, getTask, createTask, updateTask, deleteTask, cleanupTasks } from '../handlers/tasks';
 import { getCurrentProgram, batchMatchEpg, syncEpgSources, getEpgSourcesInfo } from '../handlers/epg';

@@ -60,8 +60,10 @@ export async function checkChannelVision(
 
   try {
     const parsed = parseJsonResponse(response.content);
+    const validStatuses = ['ok', 'promo_loop', 'invalid', 'frozen', 'no_image', 'error'];
+    const status = validStatuses.includes(parsed.status) ? parsed.status as VisionCheckResult['status'] : 'error';
     return {
-      status: parsed.status || 'error',
+      status,
       detail: parsed.detail || '',
     };
   } catch {

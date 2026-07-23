@@ -1,4 +1,4 @@
-import type { Channel } from '../types';
+import type { Channel, Env } from '../types';
 import { chatText, type ChatMessage } from './llm-client';
 
 const DEFAULT_SYSTEM_PROMPT = `你是一个专业的 IPTV 节目表编排助手。你的任务是将给定的频道列表按照合理的分组进行排序。
@@ -31,6 +31,7 @@ export interface OrganizeResult {
 }
 
 export async function organizePlaylist(
+  env: Env,
   channels: Channel[],
   customPrompt?: string
 ): Promise<OrganizeResult> {
@@ -51,7 +52,7 @@ export async function organizePlaylist(
     { role: 'user', content: userPrompt },
   ];
 
-  const response = await chatText(undefined as any, messages);
+  const response = await chatText(env, messages);
   if (response.error) {
     return { groups: [], same_channels: [], error: response.error };
   }

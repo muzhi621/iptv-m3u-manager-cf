@@ -2,18 +2,18 @@ import type { Env, Channel } from '../types';
 
 export async function listChannels(
   env: Env,
-  opts: { page?: number; page_size?: number; group?: string; source_id?: number; search?: string; enabled_only?: boolean } = {}
+  opts: { page?: number; page_size?: number; group?: string; subscription_id?: number; search?: string; enabled_only?: boolean } = {}
 ): Promise<{ data: Channel[]; total: number }> {
-  const { page = 1, page_size = 50, group, source_id, search, enabled_only } = opts;
+  const { page = 1, page_size = 50, group, subscription_id, search, enabled_only } = opts;
   const offset = (page - 1) * page_size;
 
   const conditions: string[] = [];
   const params: unknown[] = [];
 
-  if (group) { conditions.push('group_title = ?'); params.push(group); }
-  if (source_id) { conditions.push('source_id = ?'); params.push(source_id); }
+  if (group) { conditions.push('"group" = ?'); params.push(group); }
+  if (subscription_id) { conditions.push('subscription_id = ?'); params.push(subscription_id); }
   if (search) { conditions.push('(name LIKE ? OR tvg_name LIKE ?)'); params.push(`%${search}%`, `%${search}%`); }
-  if (enabled_only) { conditions.push('enabled = 1'); }
+  if (enabled_only) { conditions.push('is_enabled = 1'); }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
@@ -22,7 +22,7 @@ export async function listChannels(
     .first<{ count: number }>();
 
   const { results } = await env.DB.prepare(
-    `SELECT * FROM channels ${where} ORDER BY group_title, name LIMIT ? OFFSET ?`
+    `SELECT * FROM channels ${where} ORDER BY "group", name LIMIT ? OFFSET ?`
   )
     .bind(...params, page_size, offset)
     .all<Channel>();
@@ -37,19 +37,17 @@ export async function getChannel(env: Env, id: number): Promise<Channel | null> 
 export async function updateChannel(
   env: Env,
   id: number,
-  data: Partial<Pick<Channel, 'enabled' | 'group_title' | 'name' | 'status'>>
+  data: Partial<Pick<Channel, 'is_enabled' | 'group' | 'name'>>
 ): Promise<Channel | null> {
   const fields: string[] = [];
   const values: unknown[] = [];
 
-  if (data.enabled !== undefined) { fields.push('enabled = ?'); values.push(data.enabled); }
-  if (data.group_title !== undefined) { fields.push('group_title = ?'); values.push(data.group_title); }
+  if (data.is_enabled !== undefined) { fields.push('is_enabled = ?'); values.push(data.is_enabled); }
+  if (data.group !== undefined) { fields.push('"group" = ?'); values.push(data.group); }
   if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
-  if (data.status !== undefined) { fields.push('status = ?'); values.push(data.status); }
 
   if (fields.length === 0) return getChannel(env, id);
 
-  fields.push('updated_at = datetime(\'now\')');
   values.push(id);
 
   await env.DB.prepare(`UPDATE channels SET ${fields.join(', ')} WHERE id = ?`)
@@ -67,15 +65,17 @@ export async function deleteChannel(env: Env, id: number): Promise<boolean> {
 export async function batchUpdateChannels(
   env: Env,
   ids: number[],
-  data: Partial<Pick<Channel, 'enabled' | 'group_title'>>
+  data: Partial<Pick<Channel, 'is_enabled' | 'group'>>
 ): Promise<void> {
   if (ids.length === 0) return;
 
-  const fields: string[] = ['updated_at = datetime(\'now\')'];
+  const fields: string[] = [];
   const baseValues: unknown[] = [];
 
-  if (data.enabled !== undefined) { fields.push('enabled = ?'); baseValues.push(data.enabled); }
-  if (data.group_title !== undefined) { fields.push('group_title = ?'); baseValues.push(data.group_title); }
+  if (data.is_enabled !== undefined) { fields.push('is_enabled = ?'); baseValues.push(data.is_enabled); }
+  if (data.group !== undefined) { fields.push('"group" = ?'); baseValues.push(data.group); }
+
+  if (fields.length === 0) return;
 
   const placeholders = ids.map(() => '?').join(',');
   await env.DB.prepare(
@@ -87,13 +87,13 @@ export async function batchUpdateChannels(
 
 export async function insertChannels(
   env: Env,
-  sourceId: number,
-  channels: Array<{ name: string; tvg_name: string; tvg_id: string; tvg_logo: string; group_title: string; url: string; tvg_chno: string }>
+  subscriptionId: number,
+  channels: Array<{ name: string; tvg_name: string; tvg_id: string; logo: string; group: string; url: string }>
 ): Promise<number> {
   if (channels.length === 0) return 0;
 
-  // Delete existing channels for this source first
-  await env.DB.prepare('DELETE FROM channels WHERE source_id = ?').bind(sourceId).run();
+  // Delete existing channels for this subscription first
+  await env.DB.prepare('DELETE FROM channels WHERE subscription_id = ?').bind(subscriptionId).run();
 
   // Batch insert (D1 supports up to 100 statements per batch)
   const BATCH_SIZE = 50;
@@ -103,8 +103,8 @@ export async function insertChannels(
     const batch = channels.slice(i, i + BATCH_SIZE);
     const stmts = batch.map((ch) =>
       env.DB.prepare(
-        'INSERT INTO channels (source_id, name, tvg_name, tvg_id, tvg_logo, group_title, url, tvg_chno) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-      ).bind(sourceId, ch.name, ch.tvg_name, ch.tvg_id, ch.tvg_logo, ch.group_title, ch.url, ch.tvg_chno)
+        'INSERT INTO channels (subscription_id, name, tvg_name, tvg_id, logo, "group", url) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      ).bind(subscriptionId, ch.name, ch.tvg_name, ch.tvg_id, ch.logo, ch.group, ch.url)
     );
     await env.DB.batch(stmts);
     inserted += batch.length;

@@ -65,7 +65,7 @@ export default {
       'SELECT * FROM subscriptions WHERE is_enabled = 1 AND auto_update_minutes > 0'
     ).all();
 
-    for (const sub of subs) {
+    for (const sub of subs as any[]) {
       if (sub.last_updated) {
         const lastUpdate = new Date(sub.last_updated).getTime();
         const interval = sub.auto_update_minutes * 60 * 1000;
@@ -73,10 +73,9 @@ export default {
       }
 
       console.log(`Auto-syncing subscription: ${sub.name}`);
-      // Trigger sync
       try {
-        const response = await fetch(sub.url, {
-          headers: { 'User-Agent': sub.user_agent || 'AptvPlayer/1.4.1' },
+        const response = await fetch(sub.url as string, {
+          headers: { 'User-Agent': (sub.user_agent as string) || 'AptvPlayer/1.4.1' },
           signal: AbortSignal.timeout(30000),
         });
 

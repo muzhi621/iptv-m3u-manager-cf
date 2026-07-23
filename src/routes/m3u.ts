@@ -52,9 +52,9 @@ m3u.get('/m3u/:slug', async (c) => {
     name: ch.name,
     tvg_id: ch.tvg_id,
     tvg_name: ch.tvg_name || ch.name,
-    tvg_logo: ch.tvg_logo,
-    tvg_chno: ch.tvg_chno,
-    group_title: ch.group_title,
+    tvg_logo: ('logo' in ch) ? ch.logo : ('tvg_logo' in ch ? ch.tvg_logo : ''),
+    tvg_chno: '',
+    group_title: ('group' in ch) ? ch["group"] : ('group_title' in ch ? ch.group_title : ''),
     url: ch.url,
   }));
 

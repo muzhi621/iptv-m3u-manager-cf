@@ -3,7 +3,6 @@ import {
   refreshEpg,
   lookupProgram,
   batchLookupChannels,
-  splitEpgUrls,
   type EpgData,
 } from '../services/epg-parser';
 import { getOutputSource, aggregateChannels } from './outputs';
@@ -22,14 +21,14 @@ export async function getCurrentProgram(
   if (!channel) return null;
 
   // Try to find EPG URL from associated output sources
-  const outputs = await env.DB.prepare(
+  const { results: outputs } = await env.DB.prepare(
     'SELECT epg_url FROM output_sources WHERE epg_url != "" LIMIT 1'
   ).all<{ epg_url: string }>();
 
   if (outputs.length === 0) return null;
 
   const epgUrl = outputs[0].epg_url;
-  return lookupProgram(env, epgUrl, channel.tvg_id, channel.tvg_name, env.CACHE, channel.logo);
+  return lookupProgram(epgUrl, channel.tvg_id, channel.tvg_name, env.CACHE, channel.logo);
 }
 
 // === Batch EPG Match ===
@@ -38,14 +37,13 @@ export async function batchMatchEpg(
   env: Env,
   channelIds: number[]
 ): Promise<{ matched: number; total: number; results: Array<{ id: number; title: string }> }> {
-  // Get channels
   const placeholders = channelIds.map(() => '?').join(',');
-  const channels = await env.DB.prepare(
+  const { results: channels } = await env.DB.prepare(
     `SELECT id, tvg_name, tvg_id, logo FROM channels WHERE id IN (${placeholders})`
   ).bind(...channelIds).all<{ id: number; tvg_name: string; tvg_id: string; logo: string }>();
 
   // Find EPG URL
-  const outputs = await env.DB.prepare(
+  const { results: outputs } = await env.DB.prepare(
     'SELECT epg_url FROM output_sources WHERE epg_url != "" LIMIT 1'
   ).all<{ epg_url: string }>();
 
@@ -58,7 +56,7 @@ export async function batchMatchEpg(
   }
 
   const epgUrl = outputs[0].epg_url;
-  const lookupResults = await batchLookupChannels(env, epgUrl, channels, env.CACHE);
+  const lookupResults = await batchLookupChannels(epgUrl, channels, env.CACHE);
 
   let matched = 0;
   const results: Array<{ id: number; title: string }> = [];
@@ -108,7 +106,7 @@ export async function syncEpgSources(
       logo: ch.logo,
     }));
 
-    const matchResults = await batchLookupChannels(env, epgUrl, channelData, env.CACHE);
+    const matchResults = await batchLookupChannels(epgUrl, channelData, env.CACHE);
 
     let matched = 0;
     for (const [, result] of matchResults) {
@@ -143,6 +141,3 @@ export async function getEpgSourcesInfo(env: Env): Promise<Array<{ id: number; n
   ).all<{ id: number; name: string; epg_url: string }>();
   return results;
 }
-
-// Re-export splitEpgUrls for use in routes
-export { splitEpgUrls };

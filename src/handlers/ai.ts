@@ -23,7 +23,7 @@ export async function aiGroup(
 
     await updateTask(env, taskId, { progress: 30, message: `正在分析 ${filtered.length} 个频道...` });
 
-    const result = await organizePlaylist(filtered, customPrompt);
+    const result = await organizePlaylist(env, filtered, customPrompt);
     if (result.error) {
       await updateTask(env, taskId, { status: 'failure', message: result.error });
       return { success: false, error: result.error };

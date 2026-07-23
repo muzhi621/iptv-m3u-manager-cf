@@ -154,3 +154,27 @@ export interface KeywordRule {
   group: string;
   match_by: "name" | "source_group";
 }
+
+// === Filter Rule ===
+
+export interface FilterRule {
+  id: number;
+  name: string;
+  type: 'include' | 'exclude';
+  pattern: string;
+  is_regex: boolean;
+  enabled: boolean;
+  target: 'name' | 'group' | 'url';
+}
+
+// === Source (alias for Subscription) ===
+export type Source = Subscription;
+
+// === Group ===
+export interface Group {
+  id: number;
+  name: string;
+  display_name: string;
+  channels: number[];
+  is_system: boolean;
+}

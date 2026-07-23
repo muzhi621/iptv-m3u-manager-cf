@@ -19,7 +19,7 @@ export async function createGroup(
     .bind(data.name, data.display_name, data.sort_order || 0)
     .run();
 
-  return getGroup(env, result.meta.last_row_id as number)!;
+  return (await getGroup(env, result.meta.last_row_id as number))!;
 }
 
 export async function updateGroup(

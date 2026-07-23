@@ -248,7 +248,7 @@ function lookupInEpg(
 
 // === Multi-Source Fetch & Merge ===
 
-function splitEpgUrls(epgUrl: string): string[] {
+export function splitEpgUrls(epgUrl: string): string[] {
   if (!epgUrl) return [];
   return epgUrl
     .split(/[|,\n]+/)
@@ -273,23 +273,28 @@ async function fetchEpgSource(url: string): Promise<string | null> {
     // Handle gzip
     if (url.endsWith('.gz') || content.charCodeAt(0) === 0x1f) {
       try {
-        const blob = new Blob([content]);
+        // Convert string to Uint8Array for DecompressionStream
+        const encoder = new TextEncoder();
+        const inputBytes = encoder.encode(content);
         const ds = new DecompressionStream('gzip');
-        const decompressedStream = blob.stream().pipeThrough(ds);
+        const decompressedStream = new Blob([inputBytes]).stream().pipeThrough(ds);
         const reader = decompressedStream.getReader();
         const chunks: Uint8Array[] = [];
+        let totalLength = 0;
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           chunks.push(value);
+          totalLength += value.length;
         }
-        const decoder = new TextDecoder();
-        content = decoder.decode(new Uint8Array(chunks.reduce((acc, chunk) => acc + chunk.length, 0)));
+        const merged = new Uint8Array(totalLength);
         let offset = 0;
         for (const chunk of chunks) {
-          (content as any).set?.(chunk, offset);
+          merged.set(chunk, offset);
           offset += chunk.length;
         }
+        const decoder = new TextDecoder();
+        content = decoder.decode(merged);
       } catch {
         // Not gzipped, use as-is
       }

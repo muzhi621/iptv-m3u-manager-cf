@@ -37,7 +37,7 @@ export async function createSubscription(
 export async function updateSubscription(
   env: Env,
   id: number,
-  data: Partial<Pick<Subscription, 'name' | 'url' | 'user_agent' | 'headers' | 'auto_update_minutes' | 'is_enabled' | 'epg_url'>>
+  data: Partial<Pick<Subscription, 'name' | 'url' | 'user_agent' | 'headers' | 'auto_update_minutes' | 'is_enabled' | 'epg_url' | 'last_updated' | 'last_update_status'>>
 ): Promise<Subscription | null> {
   const fields: string[] = [];
   const values: unknown[] = [];
@@ -67,7 +67,7 @@ export async function deleteSubscription(env: Env, id: number): Promise<boolean>
 export async function getSubscriptionChannels(
   env: Env,
   subscriptionId: number
-): Promise<{ id: number; name: string; url: string; group: string; logo: string; is_enabled: number }[]> {
+): Promise<Record<string, unknown>[]> {
   const { results } = await env.DB.prepare(
     'SELECT id, name, url, "group", logo, is_enabled FROM channels WHERE subscription_id = ? ORDER BY "group", name'
   ).bind(subscriptionId).all();
