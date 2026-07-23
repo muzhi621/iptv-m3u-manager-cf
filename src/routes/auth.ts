@@ -10,7 +10,7 @@ import {
 
 const auth = new Hono<{ Bindings: Env }>();
 
-auth.post('/api/login', async (c) => {
+auth.post('/api/auth/login', async (c) => {
   const body = await c.req.json<{ password: string }>();
 
   if (!verifyPassword(body.password, c.env)) {
@@ -28,7 +28,7 @@ auth.post('/api/login', async (c) => {
   });
 });
 
-auth.post('/api/logout', async (c) => {
+auth.post('/api/auth/logout', async (c) => {
   const cookie = clearSessionCookie();
   return new Response(JSON.stringify({ success: true }), {
     headers: {

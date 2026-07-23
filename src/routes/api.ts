@@ -16,7 +16,7 @@ const api = new Hono<{ Bindings: Env }>();
 // Auth middleware
 api.use('*', async (c, next) => {
   const path = c.req.path;
-  if (path === '/api/health' || path === '/api/auth/login' || path === '/api/auth/status') return next();
+  if (path === '/api/health' || path.startsWith('/api/auth/')) return next();
 
   if (!isAuthenticated(c.req.raw, c.env)) {
     return c.json({ success: false, error: 'Unauthorized' }, 401);
