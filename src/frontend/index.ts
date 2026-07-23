@@ -76,7 +76,7 @@ function login(){
       localStorage.setItem(TOKEN_KEY,r.token);
       S.auth=true;
       render();
-      load();
+      setTimeout(load,100);
     }else{
       alert('密码错误');
     }
