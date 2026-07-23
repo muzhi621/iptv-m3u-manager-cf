@@ -3,17 +3,23 @@ import type { Env } from '../types';
 const SESSION_COOKIE = 'iptv_session';
 const SESSION_TTL = 86400 * 7; // 7 days
 
+// Default values when env vars are not set
+const DEFAULT_PASSWORD = 'admin';
+const DEFAULT_SECRET = 'iptv-m3u-manager-default-secret';
+
 export function verifyPassword(password: string, env: Env): boolean {
-  return password === env.ADMIN_PASSWORD;
+  const expected = env.ADMIN_PASSWORD || DEFAULT_PASSWORD;
+  return password === expected;
 }
 
-export function createSessionToken(secret: string): string {
+export function createSessionToken(env: Env): string {
+  const secret = env.COOKIE_SECRET || DEFAULT_SECRET;
   const data = `${Date.now()}:${Math.random().toString(36).slice(2)}`;
-  // Simple token - in production use proper HMAC
   return btoa(data + ':' + simpleHash(data + secret));
 }
 
-export function verifySession(token: string, secret: string): boolean {
+export function verifySession(token: string, env: Env): boolean {
+  const secret = env.COOKIE_SECRET || DEFAULT_SECRET;
   try {
     const decoded = atob(token);
     const [data, hash] = decoded.split(':');
@@ -48,7 +54,7 @@ export function clearSessionCookie(): string {
 export function isAuthenticated(request: Request, env: Env): boolean {
   const token = getSessionCookie(request);
   if (!token) return false;
-  return verifySession(token, env.COOKIE_SECRET);
+  return verifySession(token, env);
 }
 
 function simpleHash(str: string): string {

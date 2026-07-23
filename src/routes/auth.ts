@@ -17,7 +17,7 @@ auth.post('/api/login', async (c) => {
     return c.json({ success: false, error: 'Invalid password' }, 401);
   }
 
-  const token = createSessionToken(c.env.COOKIE_SECRET);
+  const token = createSessionToken(c.env);
   const cookie = setSessionCookie(token);
 
   return new Response(JSON.stringify({ success: true }), {
