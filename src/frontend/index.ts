@@ -51,7 +51,19 @@ async function api(path,options={}){const r=await fetch(API_BASE+path,{...option
 async function checkAuth(){const r=await api('/api/auth/status');state.authenticated=r.data?.authenticated??false;render()}
 async function login(p){const r=await api('/api/auth/login',{method:'POST',body:JSON.stringify({password:p})});if(r.success){state.authenticated=true;render()}else alert('密码错误')}
 async function logout(){await api('/api/auth/logout',{method:'POST'});state.authenticated=false;render()}
-async function loadData(){const[subs,outs,tasks]=await Promise.all([api('/subscriptions'),api('/outputs'),api('/api/tasks')]);state.subscriptions=subs.data||[];state.outputs=outs.data||[];state.tasks=tasks.data||[];render()}
+async function loadData(){
+  try{
+    const[subs,outs,tasks]=await Promise.all([
+      api('/subscriptions').catch(()=>({data:[]})),
+      api('/outputs').catch(()=>({data:[]})),
+      api('/api/tasks').catch(()=>({data:[]}))
+    ]);
+    state.subscriptions=subs.data||[];
+    state.outputs=outs.data||[];
+    state.tasks=tasks.data||[];
+  }catch(e){console.error('Load data error:',e)}
+  render();
+}
 async function addSub(){const n=prompt('订阅名称:');if(!n)return;const u=prompt('M3U/TXT地址:');if(!u)return;await api('/subscriptions',{method:'POST',body:JSON.stringify({name:n,url:u})});await loadData()}
 async function delSub(id){if(!confirm('确定删除?'))return;await api('/subscriptions/'+id,{method:'DELETE'});await loadData()}
 async function syncSub(id){await api('/subscriptions/'+id+'/refresh',{method:'POST'});alert('同步已启动');setTimeout(loadData,2000)}
