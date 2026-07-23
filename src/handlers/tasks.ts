@@ -1,4 +1,5 @@
 import type { Env, TaskRecord } from '../types';
+import { broadcastTaskUpdate } from '../services/websocket';
 
 export async function listTasks(env: Env, limit = 50): Promise<TaskRecord[]> {
   const { results } = await env.DB.prepare(
@@ -22,6 +23,8 @@ export async function createTask(
     .bind(id, name, 'pending', 0, '', '{}', 1)
     .run();
 
+  broadcastTaskUpdate(id, 'pending', 0, '任务已创建');
+
   return (await getTask(env, id))!;
 }
 
@@ -44,6 +47,14 @@ export async function updateTask(
   await env.DB.prepare(`UPDATE task_records SET ${fields.join(', ')} WHERE id = ?`)
     .bind(...values)
     .run();
+
+  // Broadcast update via WebSocket
+  broadcastTaskUpdate(
+    id,
+    data.status || '',
+    data.progress || 0,
+    data.message || ''
+  );
 }
 
 export async function deleteTask(env: Env, id: string): Promise<boolean> {

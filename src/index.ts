@@ -4,6 +4,7 @@ import type { Env } from './types';
 import api from './routes/api';
 import auth from './routes/auth';
 import { INDEX_HTML } from './frontend/index';
+import { handleWebSocketUpgrade, getConnectionCount } from './services/websocket';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -18,6 +19,20 @@ app.use('*', cors({
 // Serve frontend
 app.get('/', (c) => {
   return c.html(INDEX_HTML);
+});
+
+// WebSocket endpoint
+app.get('/ws', (c) => {
+  const upgradeHeader = c.req.header('Upgrade');
+  if (upgradeHeader !== 'websocket') {
+    return c.json({ error: 'Expected WebSocket upgrade' }, 426);
+  }
+  return handleWebSocketUpgrade(c.req.raw, c.env);
+});
+
+// WebSocket status
+app.get('/api/ws/status', (c) => {
+  return c.json({ success: true, data: { connections: getConnectionCount() } });
 });
 
 // Auth routes
