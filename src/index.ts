@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import type { Env } from './types';
 import api from './routes/api';
 import auth from './routes/auth';
@@ -8,14 +7,6 @@ import { handleWebSocketUpgrade, getConnectionCount } from './services/websocket
 import { ensureDbInitialized } from './db/init';
 
 const app = new Hono<{ Bindings: Env }>();
-
-// CORS
-app.use('*', cors({
-  origin: '*',
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Cookie'],
-  credentials: true,
-}));
 
 // Auto-initialize database on first request
 app.use('*', async (c, next) => {
