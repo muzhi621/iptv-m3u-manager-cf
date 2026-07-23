@@ -46,32 +46,47 @@ export const INDEX_HTML = `<!DOCTYPE html>
 (function(){
 var S={auth:false,view:'subs',subs:[],outs:[],tasks:[]};
 
+var TOKEN_KEY='iptv_token';
+
 function api(p,o){
   o=o||{};
   o.headers=o.headers||{};
   o.headers['Content-Type']='application/json';
-  o.credentials='include';
+  var t=localStorage.getItem(TOKEN_KEY);
+  if(t)o.headers['Authorization']='Bearer '+t;
   return fetch(p,o).then(function(r){return r.json()});
 }
 
 function chk(){
+  var t=localStorage.getItem(TOKEN_KEY);
+  if(!t){S.auth=false;render();return}
   api('/api/auth/status').then(function(r){
-    S.auth=r.data?r.data.authenticated:false;
+    S.auth=r.authenticated||false;
+    if(!S.auth)localStorage.removeItem(TOKEN_KEY);
     render();
-  }).catch(function(){render()});
+    if(S.auth)load();
+  }).catch(function(){S.auth=false;render()});
 }
 
 function login(){
   var pw=document.getElementById('pw');
   if(!pw)return;
   api('/api/auth/login',{method:'POST',body:JSON.stringify({password:pw.value})}).then(function(r){
-    if(r.success){S.auth=true;render();load()}
-    else alert('密码错误');
+    if(r.success&&r.token){
+      localStorage.setItem(TOKEN_KEY,r.token);
+      S.auth=true;
+      render();
+      load();
+    }else{
+      alert('密码错误');
+    }
   });
 }
 
 function logout(){
-  api('/api/auth/logout',{method:'POST'}).then(function(){S.auth=false;render()});
+  localStorage.removeItem(TOKEN_KEY);
+  S.auth=false;
+  render();
 }
 
 function load(){
