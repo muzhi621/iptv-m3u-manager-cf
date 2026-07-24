@@ -428,7 +428,7 @@ function showEditOutputModal(id){
 // === Actions ===
 function addSub(){showAddSubModal()}
 function editSub(id){showEditSubModal(id)}
-function syncSub(id){api("/subscriptions/"+id+"/refresh",{method:"POST'}).then(function(){toast("同步已启动","info");setTimeout(load,2000)}).catch(function(e){toast(e.message,"error")})}
+function syncSub(id){api("/subscriptions/"+id+"/refresh",{method:"POST"}).then(function(){toast("同步已启动","info");setTimeout(load,2000)}).catch(function(e){toast(e.message,"error")})}
 function delSub(id){showConfirm("确定删除此订阅源？",function(){api("/subscriptions/"+id,{method:"DELETE"}).then(function(){toast("已删除","success");load()}).catch(function(e){toast(e.message,"error")})})}
 function viewSubChannels(id){S.selectedSub=id;S.view="sub-channels";render();api("/subscriptions/"+id+"/channels").then(function(r){S.channels=r.data||[];renderContent()}).catch(function(e){toast(e.message,"error")})}
 function toggleChannel(id){api("/channels/"+id+"/toggle",{method:"POST"}).then(function(){if(S.view==="sub-channels")viewSubChannels(S.selectedSub);else if(S.view==="output-detail")loadOutputDetail(S.selectedOutput)}).catch(function(e){toast(e.message,"error")})}
