@@ -16,7 +16,12 @@ app.use('*', async (c, next) => {
 
 // Serve frontend
 app.get('/', (c) => {
-  return c.html(INDEX_HTML);
+  return new Response(INDEX_HTML, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+    },
+  });
 });
 
 // WebSocket endpoint
