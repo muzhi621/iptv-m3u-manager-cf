@@ -2,9 +2,11 @@ import { Hono } from 'hono';
 import type { Env } from './types';
 import api from './routes/api';
 import auth from './routes/auth';
-import { INDEX_HTML } from './frontend/index';
 import { handleWebSocketUpgrade, getConnectionCount } from './services/websocket';
 import { ensureDbInitialized } from './db/init';
+
+// Import HTML from generated module
+import { INDEX_HTML } from './frontend/dist/index';
 
 const app = new Hono<{ Bindings: Env }>();
 
