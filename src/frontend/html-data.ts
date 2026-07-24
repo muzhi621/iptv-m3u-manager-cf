@@ -18,16 +18,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-primary:hover{background:var(--primary-hover)}
 .btn-danger{background:var(--danger);color:#fff}
 .btn-success{background:var(--success);color:#fff}
+.btn-warning{background:var(--warning);color:#fff}
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
 .btn-ghost:hover{background:var(--card)}
 .btn-sm{padding:6px 12px;font-size:12px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
 .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .card-title{font-size:16px;font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
 .input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:14px;transition:border-color .2s}
 .input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
 textarea.input{min-height:80px;resize:vertical;font-family:monospace;font-size:13px}
+select.input{cursor:pointer;appearance:auto}
 label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(--text2)}
 .form-group{margin-bottom:16px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -41,9 +42,10 @@ label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(-
 .tab:hover{color:var(--text)}
 .tab.active{border-bottom-color:var(--primary);color:var(--primary)}
 .table{width:100%;border-collapse:collapse}
-.table th,.table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
-.table th{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.table th,.table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:13px}
+.table th{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;background:rgba(79,70,229,.03)}
 .table tr:hover{background:rgba(79,70,229,.03)}
+.table td img.logo{width:24px;height:24px;border-radius:4px;object-fit:contain}
 .flex{display:flex;gap:8px;align-items:center}
 .flex-between{display:flex;justify-content:space-between;align-items:center}
 .gap-12{gap:12px}
@@ -57,7 +59,7 @@ label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(-
 .text-center{text-align:center}
 .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
-.modal{background:var(--card);border-radius:16px;padding:24px;max-width:640px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal{background:var(--card);border-radius:16px;padding:24px;max-width:900px;width:95%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .modal-header h2{font-size:18px;font-weight:600}
 .modal-close{width:32px;height:32px;border:none;background:transparent;cursor:pointer;border-radius:8px;font-size:18px;color:var(--text2);display:flex;align-items:center;justify-content:center}
@@ -70,32 +72,38 @@ label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(-
 .toast-error{background:var(--danger)}
 .toast-info{background:var(--primary)}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-.switch{position:relative;width:40px;height:22px;display:inline-block}
-.switch input{opacity:0;width:0;height:0}
-.switch .slider{position:absolute;inset:0;background:var(--border);border-radius:22px;cursor:pointer;transition:.3s}
-.switch .slider:before{content:"";position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-.switch input:checked+.slider{background:var(--primary)}
-.switch input:checked+.slider:before{transform:translateX(18px)}
 .progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
 .progress-bar-fill{height:100%;background:var(--primary);border-radius:3px;transition:width .3s}
-.search-bar{position:relative;margin-bottom:16px}
+.search-bar{position:relative;margin-bottom:12px}
 .search-bar input{padding-left:36px}
 .search-bar::before{content:"\\2315";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px}
 .empty{text-align:center;padding:60px 20px;color:var(--text2)}
 .empty-icon{font-size:48px;margin-bottom:12px}
-.preview-group{margin-bottom:16px}
-.preview-group-title{font-weight:600;font-size:14px;padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.preview-channel{display:flex;align-items:center;padding:8px 12px;border-radius:8px;margin-bottom:4px;transition:background .15s}
-.preview-channel:hover{background:rgba(79,70,229,.05)}
-.preview-channel .name{flex:1;font-size:13px}
-.preview-channel .epg{font-size:11px;color:var(--text2);margin-left:8px}
+.list-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px;transition:box-shadow .2s}
+.list-item:hover{box-shadow:var(--shadow)}
+.list-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.list-item-title{font-size:15px;font-weight:600}
+.list-item-url{font-size:12px;color:var(--text2);word-break:break-all;margin-bottom:6px;font-family:monospace;background:rgba(79,70,229,.05);padding:6px 10px;border-radius:6px}
+.list-item-meta{font-size:12px;color:var(--text2);margin-bottom:10px}
+.list-item-actions{display:flex;gap:6px;flex-wrap:wrap}
+.sub-type-tabs{display:flex;gap:8px;margin-bottom:16px}
+.sub-type-tab{padding:8px 20px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .2s;background:var(--card)}
+.sub-type-tab:hover{border-color:var(--primary);color:var(--primary)}
+.sub-type-tab.active{border-color:var(--primary);background:var(--primary);color:#fff}
+.preview-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding:12px;background:rgba(79,70,229,.03);border-radius:8px}
+.preview-toolbar .search-bar{margin-bottom:0;flex:1;min-width:200px}
+.ch-check{width:16px;height:16px;cursor:pointer;accent-color:var(--primary)}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.status-ok{background:var(--success)}
+.status-fail{background:var(--danger)}
+.status-pending{background:var(--warning)}
 </style>
 </head>
 <body>
 <div id="app" class="app"></div>
 <script>
 (function(){
-var S={auth:false,view:"subs",subs:[],outs:[],tasks:[],channels:[],preview:null,outputDetail:null};
+var S={auth:false,view:"subs",subs:[],outs:[],tasks:[],channels:[],preview:null,outputDetail:null,selectedSub:0,selectedOutput:0,subTypeTab:"normal"};
 var TK="iptv_token";
 
 function api(p,o){
@@ -173,7 +181,7 @@ function showModal(title,body,onConfirm,onOpen){
   h2.textContent=title;
   var closeBtn=document.createElement("button");
   closeBtn.className="modal-close";
-  closeBtn.textContent="\u2715";
+  closeBtn.textContent="\\u2715";
   closeBtn.onclick=function(){m.remove()};
   hdr.appendChild(h2);
   hdr.appendChild(closeBtn);
@@ -244,29 +252,34 @@ function renderContent(){
   else if(S.view==="tasks")renderTasks(c);
 }
 
+// === Subscriptions List ===
 function renderSubs(c){
-  var h='<div class="card-header"><div class="card-title">订阅源 ('+S.subs.length+')</div><button class="btn btn-primary" id="addSubBtn">+ 添加订阅</button></div>';
-  if(S.subs.length===0)h+='<div class="empty"><div class="empty-icon">\u{1F4FA}</div><div>暂无订阅源</div><div class="text-sm text-muted mt-8">点击上方按钮添加第一个订阅源</div></div>';
-  else{h+='<div class="grid">';
-  S.subs.forEach(function(s){
-    h+='<div class="card"><div class="flex-between mb-8"><strong>'+esc(s.name)+'</strong><span class="badge '+(s.is_enabled?"badge-ok":"badge-err")+'">'+(s.is_enabled?"启用":"禁用")+'</span></div>';
-    h+='<div class="text-xs text-muted truncate mb-8" title="'+esc(s.url)+'">'+esc(s.url)+'</div>';
-    h+='<div class="text-xs text-muted mb-8">'+(s.last_update_status||"未同步")+'</div>';
-    h+='<div class="flex gap-12">';
-    h+='<button class="btn btn-primary btn-sm" data-action="sync" data-id="'+s.id+'">同步</button>';
-    h+='<button class="btn btn-ghost btn-sm" data-action="view-ch" data-id="'+s.id+'">频道</button>';
-    h+='<button class="btn btn-ghost btn-sm" data-action="edit-sub" data-id="'+s.id+'">编辑</button>';
-    h+='<button class="btn btn-danger btn-sm" data-action="del-sub" data-id="'+s.id+'">删除</button>';
-    h+='</div></div>';
-  });
-  h+='</div>';}
+  var h='<div class="card-header"><div class="card-title">\\u{1F4E5} 订阅源 ('+S.subs.length+')</div><button class="btn btn-primary" id="addSubBtn">+ 添加订阅源</button></div>';
+  if(S.subs.length===0){
+    h+='<div class="empty"><div class="empty-icon">\\u{1F4FA}</div><div>暂无订阅源</div><div class="text-sm text-muted mt-8">点击上方按钮添加第一个订阅源</div></div>';
+  }else{
+    S.subs.forEach(function(s){
+      var isGit=s.url.indexOf(".git")!==-1||s.url.indexOf("github.com")!==-1;
+      h+='<div class="list-item">';
+      h+='<div class="list-item-header"><div class="list-item-title">'+esc(s.name)+'</div><div class="flex gap-12"><span class="badge '+(s.is_enabled?"badge-ok":"badge-err")+'">'+(s.is_enabled?"启用":"禁用")+'</span><span class="badge badge-info">'+(isGit?"Git 仓库":"普通订阅")+'</span></div></div>';
+      h+='<div class="list-item-url" title="'+esc(s.url)+'">'+esc(s.url)+'</div>';
+      h+='<div class="list-item-meta">'+(s.last_update_status||"未同步")+(s.last_updated?" | "+esc(s.last_updated):"")+(s.auto_update_minutes>0?" | 自动更新: 每"+s.auto_update_minutes+"分钟":"")+'</div>';
+      h+='<div class="list-item-actions">';
+      h+='<button class="btn btn-primary btn-sm" data-action="sync" data-id="'+s.id+'">\\u{1F504} 同步</button>';
+      h+='<button class="btn btn-ghost btn-sm" data-action="view-ch" data-id="'+s.id+'">\\u{1F4FA} 频道</button>';
+      h+='<button class="btn btn-ghost btn-sm" data-action="edit-sub" data-id="'+s.id+'">\\u{270F}\\uFE0F 修改</button>';
+      h+='<button class="btn btn-ghost btn-sm" data-action="toggle-sub" data-id="'+s.id+'">'+(s.is_enabled?"\\u{1F512} 禁用":"\\u{1F513} 启用")+'</button>';
+      h+='<button class="btn btn-danger btn-sm" data-action="del-sub" data-id="'+s.id+'">\\u{1F5D1}\\uFE0F 删除</button>';
+      h+='</div></div>';
+    });
+  }
   c.innerHTML=h;
   document.getElementById("addSubBtn").onclick=function(){showAddSubModal()};
 }
 
 function renderSubChannels(c){
   var sub=S.subs.find(function(x){return x.id===S.selectedSub});
-  var h='<div class="flex-between mb-16"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backSubBtn">← 返回</button><h3>'+(sub?esc(sub.name):"")+' - 频道列表</h3></div><span class="text-sm text-muted">共 '+S.channels.length+' 个频道</span></div>';
+  var h='<div class="flex-between mb-16"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backSubBtn">\\u2190 返回</button><h3>'+(sub?esc(sub.name):"")+' - 频道列表</h3></div><span class="text-sm text-muted">共 '+S.channels.length+' 个频道</span></div>';
   h+='<div class="search-bar"><input class="input" id="chSearch" placeholder="搜索频道..."></div>';
   h+='<div class="card"><table class="table"><thead><tr><th>名称</th><th>分组</th><th>状态</th><th>操作</th></tr></thead><tbody id="ch-list">';
   S.channels.forEach(function(ch){
@@ -285,66 +298,201 @@ function filterSubChannels(q){
   }
 }
 
+// === Outputs List ===
 function renderOutputs(c){
-  var h='<div class="card-header"><div class="card-title">聚合源 ('+S.outs.length+')</div><button class="btn btn-primary" id="addOutBtn">+ 创建聚合</button></div>';
-  if(S.outs.length===0)h+='<div class="empty"><div class="empty-icon">\u{1F4E6}</div><div>暂无聚合源</div><div class="text-sm text-muted mt-8">创建聚合源来管理和导出频道列表</div></div>';
-  else{h+='<div class="grid">';
-  S.outs.forEach(function(o){
-    h+='<div class="card" data-action="view-out" data-id="'+o.id+'" style="cursor:pointer">';
-    h+='<div class="flex-between mb-8"><strong>'+esc(o.name)+'</strong><span class="badge '+(o.is_enabled?"badge-ok":"badge-err")+'">'+(o.is_enabled?"启用":"禁用")+'</span></div>';
-    h+='<div class="text-xs text-muted mb-8">/m3u/'+esc(o.slug)+'</div>';
-    h+='<div class="flex gap-12 mb-8"><span class="text-sm">频道: '+(o.member_enabled||0)+' / '+(o.member_total||0)+'</span></div>';
-    h+='<div class="text-xs text-muted mb-8">'+(o.last_update_status||"未更新")+'</div>';
-    h+='<div class="flex gap-12">';
-    h+='<button class="btn btn-ghost btn-sm" data-action="refresh-out" data-id="'+o.id+'">刷新</button>';
-    h+='<button class="btn btn-ghost btn-sm" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制链接</button>';
-    h+='<button class="btn btn-ghost btn-sm" data-action="edit-out" data-id="'+o.id+'">编辑</button>';
-    h+='<button class="btn btn-danger btn-sm" data-action="del-out" data-id="'+o.id+'">删除</button>';
-    h+='</div></div>';
-  });
-  h+='</div>';}
+  var h='<div class="card-header"><div class="card-title">\\u{1F4E6} 聚合源 ('+S.outs.length+')</div><button class="btn btn-primary" id="addOutBtn">+ 创建聚合</button></div>';
+  if(S.outs.length===0){
+    h+='<div class="empty"><div class="empty-icon">\\u{1F4E6}</div><div>暂无聚合源</div><div class="text-sm text-muted mt-8">创建聚合源来管理和导出频道列表</div></div>';
+  }else{
+    S.outs.forEach(function(o){
+      h+='<div class="list-item">';
+      h+='<div class="list-item-header"><div class="list-item-title">'+esc(o.name)+' <span class="badge '+(o.is_enabled?"badge-ok":"badge-err")+'">'+(o.is_enabled?"运行中":"已禁用")+'</span></div></div>';
+      h+='<div class="list-item-url">'+location.origin+'/m3u/'+esc(o.slug)+' <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;margin-left:8px" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制</button></div>';
+      h+='<div class="list-item-meta">';
+      h+=(o.filter_regex&&o.filter_regex!==".*"?"正则: "+esc(o.filter_regex)+" | ":"");
+      h+='\\u{1F4FA} 频道: '+(o.member_total||0)+' 总计  \\u{2705} '+(o.member_enabled||0)+' 启用  \\u{274C} '+(o.member_disabled||0)+' 禁用';
+      h+=' (来源: '+JSON.parse(o.subscription_ids||"[]").length+')';
+      h+='</div>';
+      h+='<div class="list-item-meta">';
+      h+=(o.last_updated?"最后同步: "+esc(o.last_updated):"从未同步");
+      h+=(o.last_request_time?" | 最近请求: "+esc(o.last_request_time):" | 最近请求: 从未");
+      h+='</div>';
+      h+='<div class="list-item-actions">';
+      h+='<button class="btn btn-ghost btn-sm" data-action="edit-out" data-id="'+o.id+'">\\u{270F}\\uFE0F 修改</button>';
+      h+='<button class="btn btn-ghost btn-sm" data-action="toggle-out" data-id="'+o.id+'">'+(o.is_enabled?"\\u{1F512} 禁用":"\\u{1F513} 启用")+'</button>';
+      h+='<button class="btn btn-primary btn-sm" data-action="refresh-out" data-id="'+o.id+'">\\u{1F504} 刷新源</button>';
+      h+='<button class="btn btn-success btn-sm" data-action="preview-out" data-id="'+o.id+'">\\u{1F441} 预览</button>';
+      h+='<button class="btn btn-danger btn-sm" data-action="del-out" data-id="'+o.id+'">\\u{1F5D1}\\uFE0F 删除</button>';
+      h+='</div></div>';
+    });
+  }
   c.innerHTML=h;
   document.getElementById("addOutBtn").onclick=function(){showAddOutputModal()};
 }
 
+// === Output Detail (Preview with Channel Selection) ===
 function renderOutputDetail(c){
   var o=S.outputDetail;
   var p=S.preview;
   if(!o){c.innerHTML='<div class="loading"><div class="spinner"></div></div>';return}
-  var h='<div class="flex-between mb-16"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backOutBtn">← 返回</button><h3>'+esc(o.name)+'</h3><span class="badge badge-info">/m3u/'+esc(o.slug)+'</span></div><div class="flex gap-12"><button class="btn btn-primary btn-sm" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制 M3U 链接</button><button class="btn btn-ghost btn-sm" data-action="edit-out" data-id="'+o.id+'">编辑配置</button></div></div>';
-  h+='<div class="card mb-16"><div class="flex-between mb-8"><div class="flex gap-12">';
-  h+='<button class="btn btn-sm '+(o.layout_mode==="rules"?"btn-primary":"btn-ghost")+'" data-action="layout" data-id="'+o.id+'" data-mode="rules">手动分组</button>';
-  h+='<button class="btn btn-sm '+(o.layout_mode==="explicit"?"btn-primary":"btn-ghost")+'" data-action="layout" data-id="'+o.id+'" data-mode="explicit">AI 分组</button>';
-  h+='</div><div class="flex gap-12">';
-  h+='<button class="btn btn-ghost btn-sm" data-action="ai-group" data-id="'+o.id+'">AI 整理</button>';
-  h+='<button class="btn btn-ghost btn-sm" data-action="ai-sort" data-id="'+o.id+'">AI 排序</button>';
-  h+='<button class="btn btn-ghost btn-sm" data-action="ai-detect" data-id="'+o.id+'">AI 检测</button>';
-  h+='</div></div>';
-  h+='<div class="search-bar"><input class="input" id="previewSearch" placeholder="搜索频道..."></div></div>';
+  var totalChannels=0;
+  var allChs=[];
   if(p&&p.groups){
-    p.groups.forEach(function(g){
-      h+='<div class="preview-group"><div class="preview-group-title"><span>'+esc(g.name)+' ('+g.count+')</span></div>';
-      g.channels.forEach(function(ch){
-        h+='<div class="preview-channel">';
-        h+='<span class="name">'+esc(ch.name)+'</span>';
-        h+='<span class="epg">'+esc(ch.epg_program||"")+'</span>';
-        h+='<label class="switch"><input type="checkbox" '+(ch.is_enabled?"checked":"")+' data-action="toggle-ch" data-id="'+ch.id+'"><span class="slider"></span></label>';
-        h+='</div>';
-      });
-      h+='</div>';
-    });
-  }else{
-    h+='<div class="empty"><div class="empty-icon">\u{1F4CB}</div><div>暂无预览数据</div><div class="text-sm text-muted mt-8">请先配置聚合源并刷新</div></div>';
+    p.groups.forEach(function(g){totalChannels+=g.count;g.channels.forEach(function(ch){ch._group=g.name;allChs.push(ch)})});
   }
+  var enabledCount=allChs.filter(function(ch){return ch.is_enabled}).length;
+  var h='<div class="flex-between mb-16"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backOutBtn">\\u2190 返回</button><h3>'+esc(o.name)+'</h3></div><div class="flex gap-12"><button class="btn btn-primary btn-sm" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制 M3U 链接</button></div></div>';
+
+  // Toolbar
+  h+='<div class="preview-toolbar">';
+  h+='<div class="search-bar"><input class="input" id="previewSearch" placeholder="搜索频道名称..."></div>';
+  h+='<label style="display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap"><input type="checkbox" id="autoToggleChk" class="ch-check"> 根据结果自动启用/禁用</label>';
+  h+='<button class="btn btn-warning btn-sm" id="quickDetectBtn">\\u{1F680} 快速检测</button>';
+  h+='<button class="btn btn-danger btn-sm" id="deepDetectBtn">\\u{1F4FA} 深度检测</button>';
+  h+='</div>';
+
+  // Selection controls
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">';
+  h+='<button class="btn btn-primary btn-sm" id="selectAllBtn">全选</button>';
+  h+='<button class="btn btn-ghost btn-sm" id="invertSelectBtn">反选</button>';
+  h+='<button class="btn btn-success btn-sm" id="selectEnabledBtn">全选启用</button>';
+  h+='<button class="btn btn-ghost btn-sm" id="selectDisabledBtn">全选禁用</button>';
+  h+='<button class="btn btn-success btn-sm" id="enableSelectedBtn">启用选中</button>';
+  h+='<button class="btn btn-danger btn-sm" id="disableSelectedBtn">禁用选中</button>';
+  h+='</div>';
+
+  // Channel table
+  h+='<div class="card" style="padding:0;overflow-x:auto"><table class="table" id="previewTable"><thead><tr>';
+  h+='<th style="width:40px"><input type="checkbox" id="checkAll" class="ch-check"></th>';
+  h+='<th style="width:40px">Logo</th>';
+  h+='<th>名称</th>';
+  h+='<th>tvg-id</th>';
+  h+='<th>分组</th>';
+  h+='<th>来源</th>';
+  h+='<th>可用性</th>';
+  h+='<th style="width:60px">操作</th>';
+  h+='</tr></thead><tbody id="preview-body">';
+
+  allChs.forEach(function(ch){
+    var logoHtml=ch.logo?'<img class="logo" src="'+esc(ch.logo)+'" onerror="this.style.display=\\'none\\'">':'<span style="display:inline-block;width:24px"></span>';
+    var subName="";
+    S.subs.forEach(function(s){if(s.id===ch.subscription_id)subName=s.name});
+    var statusHtml=ch.check_status===1?'<span class="status-dot status-ok"></span>\\u{2705} '+(ch.check_date||""):(ch.check_status===2?'<span class="status-dot status-fail"></span>\\u{274C} 失败':'<span class="status-dot status-pending"></span> -');
+
+    h+='<tr data-ch-id="'+ch.id+'">';
+    h+='<td><input type="checkbox" class="ch-check ch-select" data-id="'+ch.id+'" '+(ch.is_enabled?"checked":"")+'></td>';
+    h+='<td>'+logoHtml+'</td>';
+    h+='<td>'+esc(ch.name)+'</td>';
+    h+='<td class="text-muted">'+esc(ch.tvg_name||"-")+'</td>';
+    h+='<td>'+esc(ch._group||"-")+'</td>';
+    h+='<td class="text-muted">'+esc(subName)+'</td>';
+    h+='<td>'+statusHtml+'</td>';
+    h+='<td><button class="btn '+(ch.is_enabled?"btn-danger":"btn-success")+' btn-sm ch-toggle-btn" data-id="'+ch.id+'">'+(ch.is_enabled?"禁用":"启用")+'</button></td>';
+    h+='</tr>';
+  });
+
+  h+='</tbody></table></div>';
+
+  // Footer stats
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;color:var(--text2);font-size:13px">';
+  h+='<span>共 '+totalChannels+' 个频道 / 已启用 '+enabledCount+' 个 (已选 <span id="selectedCount">'+enabledCount+'</span> 个)</span>';
+  h+='</div>';
+
   c.innerHTML=h;
   document.getElementById("backOutBtn").onclick=function(){S.view="outs";render();load()};
+
+  // Search filter
   var ps=document.getElementById("previewSearch");
-  if(ps)ps.oninput=function(){filterPreview(this.value)};
+  if(ps)ps.oninput=function(){filterPreviewTable(this.value)};
+
+  // Check all
+  var checkAll=document.getElementById("checkAll");
+  if(checkAll)checkAll.onchange=function(){
+    var checked=this.checked;
+    document.querySelectorAll(".ch-select").forEach(function(cb){cb.checked=checked});
+    updateSelectedCount();
+  };
+
+  // Select all
+  var selAllBtn=document.getElementById("selectAllBtn");
+  if(selAllBtn)selAllBtn.onclick=function(){document.querySelectorAll(".ch-select").forEach(function(cb){cb.checked=true});updateSelectedCount()};
+
+  // Invert
+  var invBtn=document.getElementById("invertSelectBtn");
+  if(invBtn)invBtn.onclick=function(){document.querySelectorAll(".ch-select").forEach(function(cb){cb.checked=!cb.checked});updateSelectedCount()};
+
+  // Select enabled
+  var selEnBtn=document.getElementById("selectEnabledBtn");
+  if(selEnBtn)selEnBtn.onclick=function(){
+    allChs.forEach(function(ch){
+      var cb=document.querySelector('.ch-select[data-id="'+ch.id+'"]');
+      if(cb)cb.checked=ch.is_enabled?true:false;
+    });
+    updateSelectedCount();
+  };
+
+  // Select disabled
+  var selDisBtn=document.getElementById("selectDisabledBtn");
+  if(selDisBtn)selDisBtn.onclick=function(){
+    allChs.forEach(function(ch){
+      var cb=document.querySelector('.ch-select[data-id="'+ch.id+'"]');
+      if(cb)cb.checked=ch.is_enabled?false:true;
+    });
+    updateSelectedCount();
+  };
+
+  // Enable selected
+  var enSelBtn=document.getElementById("enableSelectedBtn");
+  if(enSelBtn)enSelBtn.onclick=function(){batchToggleChannels(true)};
+
+  // Disable selected
+  var disSelBtn=document.getElementById("disableSelectedBtn");
+  if(disSelBtn)disSelBtn.onclick=function(){batchToggleChannels(false)};
+
+  // Individual toggle buttons
+  document.querySelectorAll(".ch-toggle-btn").forEach(function(btn){
+    btn.onclick=function(){toggleChannel(parseInt(this.getAttribute("data-id")))}
+  });
+
+  // Update count on checkbox change
+  document.querySelectorAll(".ch-select").forEach(function(cb){
+    cb.onchange=function(){updateSelectedCount()};
+  });
+
+  // Quick detect
+  var qdBtn=document.getElementById("quickDetectBtn");
+  if(qdBtn)qdBtn.onclick=function(){toast("快速检测功能开发中","info")};
+
+  // Deep detect
+  var ddBtn=document.getElementById("deepDetectBtn");
+  if(ddBtn)ddBtn.onclick=function(){toast("深度检测功能开发中","info")};
+}
+
+function updateSelectedCount(){
+  var count=0;
+  document.querySelectorAll(".ch-select").forEach(function(cb){if(cb.checked)count++});
+  var el=document.getElementById("selectedCount");
+  if(el)el.textContent=count;
+}
+
+function filterPreviewTable(q){
+  var rows=document.querySelectorAll("#preview-body tr");
+  for(var i=0;i<rows.length;i++){
+    rows[i].style.display=rows[i].textContent.toLowerCase().indexOf(q.toLowerCase())>=0?"":"none";
+  }
+}
+
+function batchToggleChannels(enable){
+  var ids=[];
+  document.querySelectorAll(".ch-select:checked").forEach(function(cb){ids.push(parseInt(cb.getAttribute("data-id")))});
+  if(ids.length===0){toast("请先选择频道","error");return}
+  var promises=ids.map(function(id){return api("/channels/"+id+"/toggle",{method:"POST"})});
+  Promise.all(promises).then(function(){toast("已批量"+(enable?"启用":"禁用")+" "+ids.length+" 个频道","success");loadOutputDetail(S.selectedOutput)}).catch(function(e){toast(e.message,"error")});
 }
 
 function renderTasks(c){
-  var h='<div class="card-header"><div class="card-title">任务列表 ('+S.tasks.length+')</div><button class="btn btn-ghost btn-sm" id="refreshTasksBtn">刷新</button></div>';
-  if(S.tasks.length===0)h+='<div class="empty"><div class="empty-icon">\u23F3</div><div>暂无任务</div></div>';
+  var h='<div class="card-header"><div class="card-title">\\u{23F3} 任务列表 ('+S.tasks.length+')</div><button class="btn btn-ghost btn-sm" id="refreshTasksBtn">刷新</button></div>';
+  if(S.tasks.length===0)h+='<div class="empty"><div class="empty-icon">\\u23F3</div><div>暂无任务</div></div>';
   else{
     h+='<div class="card"><table class="table"><thead><tr><th>名称</th><th>状态</th><th>进度</th><th>消息</th><th>时间</th></tr></thead><tbody>';
     S.tasks.forEach(function(t){
@@ -357,29 +505,82 @@ function renderTasks(c){
   document.getElementById("refreshTasksBtn").onclick=function(){load()};
 }
 
-// === Modals ===
+// === Add Subscription Modal (with tabs) ===
 function showAddSubModal(){
-  var body='<div class="form-group"><label>订阅名称</label><input id="m-name" class="input" placeholder="我的订阅"></div>';
-  body+='<div class="form-group"><label>M3U/TXT 地址</label><textarea id="m-url" class="input" placeholder="https://example.com/playlist.m3u"></textarea></div>';
-  body+='<div class="form-row"><div class="form-group"><label>User Agent</label><input id="m-ua" class="input" value="AptvPlayer/1.4.1"></div><div class="form-group"><label>自动同步(分钟)</label><input id="m-interval" class="input" type="number" value="0" min="0"></div></div>';
-  body+='<div class="form-group"><label>EPG 链接</label><input id="m-epg" class="input" placeholder="https://example.com/epg.xml"></div>';
+  S.subTypeTab="normal";
+  var body='<div class="sub-type-tabs"><div class="sub-type-tab active" id="stab-normal" onclick="window._switchSubTab(\\'normal\\')">\\u{1F517} 普通订阅</div><div class="sub-type-tab" id="stab-git" onclick="window._switchSubTab(\\'git\\')">\\u{1F4C1} Git 仓库</div></div>';
+  body+='<div id="sub-form-normal">';
+  body+='<div class="form-group"><label>名称 (例如: 卫视精品)</label><input id="m-name" class="input" placeholder="输入订阅源名称"></div>';
+  body+='<div class="form-group"><label>M3U URL (多个地址请用英文逗号隔开)</label><textarea id="m-url" class="input" placeholder="https://example.com/playlist.m3u" style="min-height:60px"></textarea></div>';
+  body+='<div class="form-group"><label>User-Agent (可选，推荐选择下方常用 UA)</label><select id="m-ua" class="input">';
+  body+='<option value="AptvPlayer/1.4.1">AptvPlayer/1.4.1 - APTV (iOS/Apple TV) - 推荐</option>';
+  body+='<option value="Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 (KHTML, like Gecko) Version/5.2.0 Mobile Safari/537.36">TiviMate/5.2.0 (Android 15) - TiviMate (Android TV) - 推荐</option>';
+  body+='<option value="Mozilla/5.0">Mozilla/5.0 - 默认 (Browser)</option>';
+  body+='<option value="VLC/3.0.18 LibVLC/3.0.18">VLC/3.0.18 - VLC Media Player</option>';
+  body+='<option value="PotPlayer/1.7">PotPlayer/1.7 - PotPlayer (Windows)</option>';
+  body+='</select></div>';
+  body+='<div class="form-row"><div class="form-group"><label>自动更新间隔</label><select id="m-interval" class="input"><option value="0">关闭 (手动刷新)</option><option value="30">每 30 分钟</option><option value="60">每 1 小时</option><option value="180">每 3 小时</option><option value="360">每 6 小时</option><option value="720">每 12 小时</option><option value="1440">每 24 小时</option></select></div><div class="form-group"><label>EPG 地址 (可选)</label><input id="m-epg" class="input" placeholder="https://example.com/epg.xml"></div></div>';
+  body+='</div>';
+  body+='<div id="sub-form-git" style="display:none">';
+  body+='<div class="form-group"><label>名称 (例如: 卫视精品)</label><input id="m-name-git" class="input" placeholder="输入订阅源名称"></div>';
+  body+='<div class="form-group"><label>Git 仓库 URL (例如: https://github.com/YueChan/Live.git)</label><input id="m-url-git" class="input" placeholder="https://github.com/xxx/xxx.git"></div>';
+  body+='<div class="form-row"><div class="form-group"><label>自动更新间隔</label><select id="m-interval-git" class="input"><option value="0">关闭 (手动刷新)</option><option value="60">每 1 小时</option><option value="360">每 6 小时</option><option value="720">每 12 小时</option><option value="1440">每 24 小时</option></select></div></div>';
+  body+='</div>';
+
   showModal("添加订阅源",body,function(){
-    var n=document.getElementById("m-name").value;
-    var u=document.getElementById("m-url").value;
+    var isGit=S.subTypeTab==="git";
+    var n=document.getElementById(isGit?"m-name-git":"m-name").value;
+    var u=document.getElementById(isGit?"m-url-git":"m-url").value;
     if(!n||!u){toast("请填写名称和地址","error");return false}
-    api("/subscriptions",{method:"POST",body:JSON.stringify({name:n,url:u,user_agent:document.getElementById("m-ua").value,auto_update_minutes:parseInt(document.getElementById("m-interval").value)||0,epg_url:document.getElementById("m-epg").value})}).then(function(){toast("订阅源已添加","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
+    var data={name:n,url:u};
+    if(!isGit){
+      data.user_agent=document.getElementById("m-ua").value;
+      data.auto_update_minutes=parseInt(document.getElementById("m-interval").value)||0;
+      data.epg_url=document.getElementById("m-epg").value||"";
+    }else{
+      data.auto_update_minutes=parseInt(document.getElementById("m-interval-git").value)||0;
+    }
+    api("/subscriptions",{method:"POST",body:JSON.stringify(data)}).then(function(){toast("订阅源已添加","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
   });
 }
+
+function switchSubTab(tab){
+  S.subTypeTab=tab;
+  var normalForm=document.getElementById("sub-form-normal");
+  var gitForm=document.getElementById("sub-form-git");
+  var normalTab=document.getElementById("stab-normal");
+  var gitTab=document.getElementById("stab-git");
+  if(tab==="normal"){
+    normalForm.style.display="";gitForm.style.display="none";
+    normalTab.className="sub-type-tab active";gitTab.className="sub-type-tab";
+  }else{
+    normalForm.style.display="none";gitForm.style.display="";
+    normalTab.className="sub-type-tab";gitTab.className="sub-type-tab active";
+  }
+}
+window._switchSubTab=switchSubTab;
 
 function showEditSubModal(id){
   var s=S.subs.find(function(x){return x.id===id});
   if(!s)return;
+  var isGit=s.url.indexOf(".git")!==-1||s.url.indexOf("github.com")!==-1;
   var body='<div class="form-group"><label>订阅名称</label><input id="m-name" class="input" value="'+esc(s.name)+'"></div>';
-  body+='<div class="form-group"><label>M3U/TXT 地址</label><textarea id="m-url" class="input">'+esc(s.url)+'</textarea></div>';
-  body+='<div class="form-row"><div class="form-group"><label>User Agent</label><input id="m-ua" class="input" value="'+esc(s.user_agent)+'"></div><div class="form-group"><label>自动同步(分钟)</label><input id="m-interval" class="input" type="number" value="'+s.auto_update_minutes+'" min="0"></div></div>';
-  body+='<div class="form-group"><label>EPG 链接</label><input id="m-epg" class="input" value="'+esc(s.epg_url||"")+'"></div>';
+  body+='<div class="form-group"><label>'+(isGit?"Git 仓库 URL":"M3U/TXT 地址")+'</label><textarea id="m-url" class="input">'+esc(s.url)+'</textarea></div>';
+  if(!isGit){
+    body+='<div class="form-group"><label>User Agent</label><input id="m-ua" class="input" value="'+esc(s.user_agent)+'"></div>';
+  }
+  body+='<div class="form-row"><div class="form-group"><label>自动同步(分钟)</label><input id="m-interval" class="input" type="number" value="'+s.auto_update_minutes+'" min="0"></div>';
+  if(!isGit){
+    body+='<div class="form-group"><label>EPG 链接</label><input id="m-epg" class="input" value="'+esc(s.epg_url||"")+'"></div>';
+  }
+  body+='</div>';
   showModal("编辑订阅源",body,function(){
-    api("/subscriptions/"+id,{method:"PUT",body:JSON.stringify({name:document.getElementById("m-name").value,url:document.getElementById("m-url").value,user_agent:document.getElementById("m-ua").value,auto_update_minutes:parseInt(document.getElementById("m-interval").value)||0,epg_url:document.getElementById("m-epg").value})}).then(function(){toast("已更新","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
+    var data={name:document.getElementById("m-name").value,url:document.getElementById("m-url").value,auto_update_minutes:parseInt(document.getElementById("m-interval").value)||0};
+    if(!isGit){
+      data.user_agent=document.getElementById("m-ua").value;
+      data.epg_url=document.getElementById("m-epg").value;
+    }
+    api("/subscriptions/"+id,{method:"PUT",body:JSON.stringify(data)}).then(function(){toast("已更新","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
   });
 }
 
@@ -425,24 +626,21 @@ function showEditOutputModal(id){
 }
 
 // === Actions ===
-function addSub(){showAddSubModal()}
-function editSub(id){showEditSubModal(id)}
 function syncSub(id){api("/subscriptions/"+id+"/refresh",{method:"POST"}).then(function(){toast("同步已启动","info");setTimeout(load,2000)}).catch(function(e){toast(e.message,"error")})}
 function delSub(id){showConfirm("确定删除此订阅源？",function(){api("/subscriptions/"+id,{method:"DELETE"}).then(function(){toast("已删除","success");load()}).catch(function(e){toast(e.message,"error")})})}
+function toggleSub(id){api("/subscriptions/"+id,{method:"PUT",body:JSON.stringify({is_enabled:0})}).then(function(){load()}).catch(function(e){toast(e.message,"error")})}
 function viewSubChannels(id){S.selectedSub=id;S.view="sub-channels";render();api("/subscriptions/"+id+"/channels").then(function(r){S.channels=r.data||[];renderContent()}).catch(function(e){toast(e.message,"error")})}
 function toggleChannel(id){api("/channels/"+id+"/toggle",{method:"POST"}).then(function(){if(S.view==="sub-channels")viewSubChannels(S.selectedSub);else if(S.view==="output-detail")loadOutputDetail(S.selectedOutput)}).catch(function(e){toast(e.message,"error")})}
-function filterPreview(q){
-  var items=document.querySelectorAll(".preview-channel");
-  for(var i=0;i<items.length;i++){
-    items[i].style.display=items[i].textContent.toLowerCase().indexOf(q.toLowerCase())>=0?"":"none";
-  }
-}
 
-function addOutput(){showAddOutputModal()}
 function editOutput(id){showEditOutputModal(id)}
 function delOutput(id){showConfirm("确定删除此聚合源？",function(){api("/outputs/"+id,{method:"DELETE"}).then(function(){toast("已删除","success");load()}).catch(function(e){toast(e.message,"error")})})}
 function refreshOutput(id){api("/outputs/"+id+"/refresh",{method:"POST"}).then(function(){toast("刷新完成","success");load()}).catch(function(e){toast(e.message,"error")})}
-function viewOutput(id){S.selectedOutput=id;S.view="output-detail";render();loadOutputDetail(id)}
+function toggleOutput(id){
+  var o=S.outs.find(function(x){return x.id===id});
+  if(!o)return;
+  api("/outputs/"+id,{method:"PUT",body:JSON.stringify({is_enabled:o.is_enabled?0:1})}).then(function(){load()}).catch(function(e){toast(e.message,"error")});
+}
+function previewOutput(id){S.selectedOutput=id;S.view="output-detail";render();loadOutputDetail(id)}
 function loadOutputDetail(id){
   Promise.all([api("/outputs/"+id),api("/outputs/"+id+"/export-preview")]).then(function(r){
     S.outputDetail=r[0].data;
@@ -450,10 +648,6 @@ function loadOutputDetail(id){
     renderContent();
   }).catch(function(e){toast(e.message,"error")});
 }
-function layoutMode(id,mode){api("/outputs/"+id+"/layout-mode",{method:"POST",body:JSON.stringify({mode:mode})}).then(function(){toast("布局已切换","success");loadOutputDetail(id)}).catch(function(e){toast(e.message,"error")})}
-function aiGroup(id){toast("AI 分组中...","info");api("/api/ai/group",{method:"POST",body:JSON.stringify({output_id:id})}).then(function(r){if(r.success){toast("AI 分组完成","success");loadOutputDetail(id)}else toast(r.error||"AI 分组失败","error")}).catch(function(e){toast(e.message,"error")})}
-function aiSort(id){toast("AI 排序中...","info");api("/api/ai/sort",{method:"POST",body:JSON.stringify({output_id:id})}).then(function(r){if(r.success){toast("AI 排序完成","success");loadOutputDetail(id)}else toast(r.error||"AI 排序失败","error")}).catch(function(e){toast(e.message,"error")})}
-function aiDetect(id){toast("AI 视觉检测中...","info");api("/api/ai/detect",{method:"POST",body:JSON.stringify({output_id:id})}).then(function(r){if(r.success){toast("检测完成","success");loadOutputDetail(id)}else toast(r.error||"检测失败","error")}).catch(function(e){toast(e.message,"error")})}
 function copyM3uUrl(slug){navigator.clipboard.writeText(location.origin+"/m3u/"+slug).then(function(){toast("M3U 链接已复制","success")}).catch(function(){toast("复制失败","error")})}
 
 // === Event Delegation ===
@@ -467,18 +661,20 @@ document.addEventListener("click",function(e){
   switch(action){
     case"sync":syncSub(id);break;
     case"view-ch":viewSubChannels(id);break;
-    case"edit-sub":editSub(id);break;
+    case"edit-sub":showEditSubModal(id);break;
     case"del-sub":delSub(id);break;
+    case"toggle-sub":toggleSub(id);break;
     case"toggle-ch":toggleChannel(id);break;
-    case"view-out":viewOutput(id);break;
+    case"preview-out":previewOutput(id);break;
     case"refresh-out":refreshOutput(id);break;
     case"copy-m3u":copyM3uUrl(slug);break;
     case"edit-out":editOutput(id);break;
     case"del-out":delOutput(id);break;
-    case"layout":layoutMode(id,mode);break;
-    case"ai-group":aiGroup(id);break;
-    case"ai-sort":aiSort(id);break;
-    case"ai-detect":aiDetect(id);break;
+    case"toggle-out":toggleOutput(id);break;
+    case"layout":break;
+    case"ai-group":break;
+    case"ai-sort":break;
+    case"ai-detect":break;
   }
 });
 
