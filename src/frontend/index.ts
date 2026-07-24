@@ -81,7 +81,7 @@ label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(-
 .progress-bar-fill{height:100%;background:var(--primary);border-radius:3px;transition:width .3s}
 .search-bar{position:relative;margin-bottom:16px}
 .search-bar input{padding-left:36px}
-.search-bar::before{content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px}
+.search-bar::before{content:"\\2315";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px}
 .empty{text-align:center;padding:60px 20px;color:var(--text2)}
 .empty-icon{font-size:48px;margin-bottom:12px}
 .preview-group{margin-bottom:16px}
