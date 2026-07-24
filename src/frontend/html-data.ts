@@ -254,7 +254,7 @@ function renderContent(){
 
 // === Subscriptions List ===
 function renderSubs(c){
-  var h='<div class="card-header"><div class="card-title">\\u{1F4E5} 订阅源 ('+S.subs.length+')</div><button class="btn btn-primary" id="addSubBtn">+ 添加订阅源</button></div>';
+  var h='<div class="card-header"><div class="card-title">\\u{1F4E5} 订阅源 ('+S.subs.length+')</div><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="importFileBtn">\\u{1F4C2} 导入文件</button><button class="btn btn-primary" id="addSubBtn">+ 添加订阅源</button></div></div>';
   if(S.subs.length===0){
     h+='<div class="empty"><div class="empty-icon">\\u{1F4FA}</div><div>暂无订阅源</div><div class="text-sm text-muted mt-8">点击上方按钮添加第一个订阅源</div></div>';
   }else{
@@ -275,6 +275,7 @@ function renderSubs(c){
   }
   c.innerHTML=h;
   document.getElementById("addSubBtn").onclick=function(){showAddSubModal()};
+  document.getElementById("importFileBtn").onclick=function(){importLocalFile()};
 }
 
 function renderSubChannels(c){
@@ -551,18 +552,28 @@ function batchToggleChannels(enable){
 }
 
 function renderTasks(c){
-  var h='<div class="card-header"><div class="card-title">\\u{23F3} 任务列表 ('+S.tasks.length+')</div><button class="btn btn-ghost btn-sm" id="refreshTasksBtn">刷新</button></div>';
+  var h='<div class="card-header"><div class="card-title">\\u{23F3} 任务列表 ('+S.tasks.length+')</div><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="cleanupTasksBtn">\\u{1F5D1}\\uFE0F 清理已完成</button><button class="btn btn-ghost btn-sm" id="refreshTasksBtn">刷新</button></div></div>';
   if(S.tasks.length===0)h+='<div class="empty"><div class="empty-icon">\\u23F3</div><div>暂无任务</div></div>';
   else{
-    h+='<div class="card"><table class="table"><thead><tr><th>名称</th><th>状态</th><th>进度</th><th>消息</th><th>时间</th></tr></thead><tbody>';
+    h+='<div class="card"><table class="table"><thead><tr><th>名称</th><th>状态</th><th>进度</th><th>消息</th><th>时间</th><th style="width:120px">操作</th></tr></thead><tbody>';
     S.tasks.forEach(function(t){
       var cls=t.status==="success"?"badge-ok":t.status==="failure"?"badge-err":t.status==="running"?"badge-info":"badge-warn";
-      h+='<tr><td>'+esc(t.name)+'</td><td><span class="badge '+cls+'">'+t.status+'</span></td><td><div class="progress-bar" style="width:100px"><div class="progress-bar-fill" style="width:'+t.progress+'%"></div></div></td><td class="text-sm">'+esc(t.message)+'</td><td class="text-xs text-muted">'+esc(t.created_at||"")+'</td></tr>';
+      h+='<tr><td>'+esc(t.name)+'</td><td><span class="badge '+cls+'">'+t.status+'</span></td><td><div class="progress-bar" style="width:80px"><div class="progress-bar-fill" style="width:'+t.progress+'%"></div></div></td><td class="text-sm">'+esc(t.message)+'</td><td class="text-xs text-muted">'+esc(t.created_at||"")+'</td>';
+      h+='<td><div class="flex gap-12">';
+      h+='<button class="btn btn-ghost btn-sm" data-action="edit-task" data-id="'+esc(t.id)+'">\\u{270F}\\uFE0F</button>';
+      if(t.status==="running"){h+='<button class="btn btn-warning btn-sm" data-action="stop-task" data-id="'+esc(t.id)+'">\\u{23F9}</button>';}
+      h+='<button class="btn btn-danger btn-sm" data-action="del-task" data-id="'+esc(t.id)+'">\\u{1F5D1}\\uFE0F</button>';
+      h+='</div></td></tr>';
     });
     h+='</tbody></table></div>';
   }
   c.innerHTML=h;
   document.getElementById("refreshTasksBtn").onclick=function(){load()};
+  document.getElementById("cleanupTasksBtn").onclick=function(){
+    showConfirm("清理所有已完成/失败的任务？",function(){
+      api("/api/tasks/cleanup",{method:"DELETE"}).then(function(){toast("已清理","success");load()}).catch(function(e){toast(e.message,"error")});
+    });
+  };
 }
 
 // === Add Subscription Modal (with tabs) ===
@@ -648,6 +659,7 @@ function showAddOutputModal(){
   var body='<div class="form-group"><label>聚合名称</label><input id="m-name" class="input" placeholder="我的聚合"></div>';
   body+='<div class="form-group"><label>URL 标识 (slug)</label><input id="m-slug" class="input" placeholder="my-aggregate"></div>';
   body+='<div class="form-group"><label>关联订阅源</label><div id="m-subs"></div></div>';
+  body+='<div class="form-group" id="m-ch-wrap" style="display:none"><label>选择频道 <span class="text-muted text-xs">(取消勾选的频道将被排除)</span></label><div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px" id="m-channels"></div><div style="margin-top:6px"><button type="button" class="btn btn-ghost btn-sm" id="m-ch-sel-all">全选</button> <button type="button" class="btn btn-ghost btn-sm" id="m-ch-desel-all">全不选</button></div></div>';
   body+='<div class="form-group"><label>EPG 链接</label><input id="m-epg" class="input" placeholder="https://example.com/epg.xml"></div>';
   body+='<div class="form-row"><div class="form-group"><label>来源后缀</label><select id="m-suffix" class="input"><option value="0">否</option><option value="1">是</option></select></div><div class="form-group"><label>正则过滤</label><input id="m-regex" class="input" value=".*"></div></div>';
   showModal("创建聚合源",body,function(){
@@ -656,11 +668,49 @@ function showAddOutputModal(){
     var n=document.getElementById("m-name").value;
     var s=document.getElementById("m-slug").value||n.toLowerCase().replace(/[^a-z0-9]+/g,"-")||"output-"+Date.now();
     if(!n){toast("请填写聚合名称","error");return false}
-    api("/outputs",{method:"POST",body:JSON.stringify({name:n,slug:s,subscription_ids:JSON.stringify(subs),epg_url:document.getElementById("m-epg").value,include_source_suffix:parseInt(document.getElementById("m-suffix").value)||0,filter_regex:document.getElementById("m-regex").value||".*"})}).then(function(){toast("聚合源已创建","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
+    // Calculate excluded channels
+    var allChIds=[];
+    document.querySelectorAll("#m-channels .ch-item").forEach(function(el){allChIds.push(parseInt(el.getAttribute("data-ch-id")))});
+    var selChIds=[];
+    document.querySelectorAll("#m-channels .ch-item input:checked").forEach(function(cb){selChIds.push(parseInt(cb.value))});
+    var excluded=allChIds.filter(function(x){return selChIds.indexOf(x)===-1});
+    api("/outputs",{method:"POST",body:JSON.stringify({name:n,slug:s,subscription_ids:JSON.stringify(subs),epg_url:document.getElementById("m-epg").value,include_source_suffix:parseInt(document.getElementById("m-suffix").value)||0,filter_regex:document.getElementById("m-regex").value||".*",excluded_channel_ids:JSON.stringify(excluded)})}).then(function(){toast("聚合源已创建","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
   },function(){
     var h="";
-    S.subs.forEach(function(s){h+='<label style="display:flex;align-items:center;padding:6px 0;cursor:pointer"><input type="checkbox" value="'+s.id+'" class="checkbox"> <span style="margin-left:8px">'+esc(s.name)+'</span></label>'});
+    S.subs.forEach(function(s){h+='<label style="display:flex;align-items:center;padding:6px 0;cursor:pointer"><input type="checkbox" value="'+s.id+'" class="checkbox sub-cb"> <span style="margin-left:8px">'+esc(s.name)+'</span></label>'});
     document.getElementById("m-subs").innerHTML=h||'<div class="text-muted text-sm">暂无订阅源</div>';
+    // Bind subscription checkbox changes to load channels
+    document.querySelectorAll(".sub-cb").forEach(function(cb){
+      cb.onchange=function(){loadOutputChannels()};
+    });
+    document.getElementById("m-ch-sel-all").onclick=function(){document.querySelectorAll("#m-channels input").forEach(function(c){c.checked=true})};
+    document.getElementById("m-ch-desel-all").onclick=function(){document.querySelectorAll("#m-channels input").forEach(function(c){c.checked=false})};
+  });
+}
+
+function loadOutputChannels(){
+  var subIds=[];
+  document.querySelectorAll(".sub-cb:checked").forEach(function(cb){subIds.push(parseInt(cb.value))});
+  var wrap=document.getElementById("m-ch-wrap");
+  var container=document.getElementById("m-channels");
+  if(subIds.length===0){wrap.style.display="none";return}
+  wrap.style.display="";
+  container.innerHTML='<div class="text-sm text-muted">加载中...</div>';
+  // Fetch channels for all selected subscriptions
+  var promises=subIds.map(function(id){return api("/subscriptions/"+id+"/channels").then(function(r){return r.data||[]}).catch(function(){return[]})});
+  Promise.all(promises).then(function(results){
+    var allChs=[];
+    results.forEach(function(chs){allChs=chs.concat(allChs)});
+    // Sort by group then name
+    allChs.sort(function(a,b){var g=(a["group"]||"").localeCompare(b["group"]||"");return g!==0?g:a.name.localeCompare(b.name)});
+    var h='';
+    var lastGroup='';
+    allChs.forEach(function(ch){
+      var g=ch["group"]||"未分组";
+      if(g!==lastGroup){h+='<div style="font-size:12px;font-weight:600;color:var(--primary);padding:6px 0 2px;border-bottom:1px solid var(--border);margin-top:4px">'+esc(g)+' ('+allChs.filter(function(c){return (c["group"]||"未分组")===g}).length+')</div>';lastGroup=g}
+      h+='<label class="ch-item" data-ch-id="'+ch.id+'" style="display:flex;align-items:center;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" value="'+ch.id+'" checked> <span style="margin-left:6px">'+esc(ch.name)+'</span></label>';
+    });
+    container.innerHTML=h||'<div class="text-muted text-sm">无频道数据</div>';
   });
 }
 
@@ -670,18 +720,58 @@ function showEditOutputModal(id){
   var body='<div class="form-group"><label>聚合名称</label><input id="m-name" class="input" value="'+esc(o.name)+'"></div>';
   body+='<div class="form-group"><label>URL 标识</label><input id="m-slug" class="input" value="'+esc(o.slug)+'"></div>';
   body+='<div class="form-group"><label>关联订阅源</label><div id="m-subs"></div></div>';
+  body+='<div class="form-group" id="m-ch-wrap" style="display:none"><label>选择频道 <span class="text-muted text-xs">(取消勾选的频道将被排除)</span></label><div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px" id="m-channels"></div><div style="margin-top:6px"><button type="button" class="btn btn-ghost btn-sm" id="m-ch-sel-all">全选</button> <button type="button" class="btn btn-ghost btn-sm" id="m-ch-desel-all">全不选</button></div></div>';
   body+='<div class="form-group"><label>EPG 链接</label><input id="m-epg" class="input" value="'+esc(o.epg_url||"")+'"></div>';
   body+='<div class="form-row"><div class="form-group"><label>来源后缀</label><select id="m-suffix" class="input"><option value="0"'+(!o.include_source_suffix?" selected":"")+'>否</option><option value="1"'+(o.include_source_suffix?" selected":"")+'>是</option></select></div><div class="form-group"><label>正则过滤</label><input id="m-regex" class="input" value="'+esc(o.filter_regex||".*")+'"></div></div>';
   body+='<div class="form-group"><label>关键字筛选 (JSON)</label><textarea id="m-keywords" class="input">'+esc(o.keywords||"[]")+'</textarea></div>';
+  var excludedIds=JSON.parse(o.excluded_channel_ids||"[]");
   showModal("编辑聚合源",body,function(){
     var subs=[];
     document.querySelectorAll("#m-subs input:checked").forEach(function(cb){subs.push(parseInt(cb.value))});
-    api("/outputs/"+id,{method:"PUT",body:JSON.stringify({name:document.getElementById("m-name").value,slug:document.getElementById("m-slug").value,subscription_ids:JSON.stringify(subs),epg_url:document.getElementById("m-epg").value,include_source_suffix:parseInt(document.getElementById("m-suffix").value)||0,filter_regex:document.getElementById("m-regex").value||".*",keywords:document.getElementById("m-keywords").value||"[]"})}).then(function(){toast("已更新","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
+    // Calculate excluded channels
+    var allChIds=[];
+    document.querySelectorAll("#m-channels .ch-item").forEach(function(el){allChIds.push(parseInt(el.getAttribute("data-ch-id")))});
+    var selChIds=[];
+    document.querySelectorAll("#m-channels .ch-item input:checked").forEach(function(cb){selChIds.push(parseInt(cb.value))});
+    var excluded=allChIds.filter(function(x){return selChIds.indexOf(x)===-1});
+    api("/outputs/"+id,{method:"PUT",body:JSON.stringify({name:document.getElementById("m-name").value,slug:document.getElementById("m-slug").value,subscription_ids:JSON.stringify(subs),epg_url:document.getElementById("m-epg").value,include_source_suffix:parseInt(document.getElementById("m-suffix").value)||0,filter_regex:document.getElementById("m-regex").value||".*",keywords:document.getElementById("m-keywords").value||"[]",excluded_channel_ids:JSON.stringify(excluded)})}).then(function(){toast("已更新","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
   },function(){
     var selected=JSON.parse(o.subscription_ids||"[]");
     var h="";
-    S.subs.forEach(function(s){h+='<label style="display:flex;align-items:center;padding:6px 0;cursor:pointer"><input type="checkbox" value="'+s.id+'" class="checkbox"'+(selected.indexOf(s.id)!==-1?" checked":"")+'> <span style="margin-left:8px">'+esc(s.name)+'</span></label>'});
+    S.subs.forEach(function(s){h+='<label style="display:flex;align-items:center;padding:6px 0;cursor:pointer"><input type="checkbox" value="'+s.id+'" class="checkbox sub-cb"'+(selected.indexOf(s.id)!==-1?" checked":"")+'> <span style="margin-left:8px">'+esc(s.name)+'</span></label>'});
     document.getElementById("m-subs").innerHTML=h||'<div class="text-muted text-sm">暂无订阅源</div>';
+    document.querySelectorAll(".sub-cb").forEach(function(cb){
+      cb.onchange=function(){loadOutputChannelsForEdit(excludedIds)};
+    });
+    document.getElementById("m-ch-sel-all").onclick=function(){document.querySelectorAll("#m-channels input").forEach(function(c){c.checked=true})};
+    document.getElementById("m-ch-desel-all").onclick=function(){document.querySelectorAll("#m-channels input").forEach(function(c){c.checked=false})};
+    // Load channels for pre-selected subscriptions
+    if(selected.length>0)loadOutputChannelsForEdit(excludedIds);
+  });
+}
+
+function loadOutputChannelsForEdit(excludedIds){
+  var subIds=[];
+  document.querySelectorAll(".sub-cb:checked").forEach(function(cb){subIds.push(parseInt(cb.value))});
+  var wrap=document.getElementById("m-ch-wrap");
+  var container=document.getElementById("m-channels");
+  if(subIds.length===0){wrap.style.display="none";return}
+  wrap.style.display="";
+  container.innerHTML='<div class="text-sm text-muted">加载中...</div>';
+  var promises=subIds.map(function(id){return api("/subscriptions/"+id+"/channels").then(function(r){return r.data||[]}).catch(function(){return[]})});
+  Promise.all(promises).then(function(results){
+    var allChs=[];
+    results.forEach(function(chs){allChs=chs.concat(allChs)});
+    allChs.sort(function(a,b){var g=(a["group"]||"").localeCompare(b["group"]||"");return g!==0?g:a.name.localeCompare(b.name)});
+    var h='';
+    var lastGroup='';
+    allChs.forEach(function(ch){
+      var g=ch["group"]||"未分组";
+      if(g!==lastGroup){h+='<div style="font-size:12px;font-weight:600;color:var(--primary);padding:6px 0 2px;border-bottom:1px solid var(--border);margin-top:4px">'+esc(g)+' ('+allChs.filter(function(c){return (c["group"]||"未分组")===g}).length+')</div>';lastGroup=g}
+      var isChecked=excludedIds.indexOf(ch.id)===-1;
+      h+='<label class="ch-item" data-ch-id="'+ch.id+'" style="display:flex;align-items:center;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" value="'+ch.id+'"'+(isChecked?" checked":"")+'> <span style="margin-left:6px">'+esc(ch.name)+'</span></label>';
+    });
+    container.innerHTML=h||'<div class="text-muted text-sm">无频道数据</div>';
   });
 }
 
@@ -739,12 +829,63 @@ function showQrModal(slug,name){
   showModal("M3U 链接二维码",body,null);
 }
 
+// === Task Actions ===
+function editTask(id){
+  var t=S.tasks.find(function(x){return x.id===id});
+  if(!t)return;
+  var body='<div class="form-group"><label>任务名称</label><input id="task-name" class="input" value="'+esc(t.name)+'"></div>';
+  body+='<div class="form-group"><label>状态</label><select id="task-status" class="input">';
+  var statuses=["pending","running","success","failure","canceled"];
+  statuses.forEach(function(s){body+='<option value="'+s+'"'+(t.status===s?" selected":"")+'>'+s+'</option>'});
+  body+='</select></div>';
+  body+='<div class="form-group"><label>进度 ('+t.progress+'%)</label><input id="task-progress" class="input" type="number" value="'+t.progress+'" min="0" max="100"></div>';
+  body+='<div class="form-group"><label>消息</label><textarea id="task-message" class="input">'+esc(t.message)+'</textarea></div>';
+  showModal("编辑任务",body,function(){
+    api("/api/tasks/"+id,{method:"PUT",body:JSON.stringify({name:document.getElementById("task-name").value,status:document.getElementById("task-status").value,progress:parseInt(document.getElementById("task-progress").value)||0,message:document.getElementById("task-message").value})}).then(function(){toast("任务已更新","success");load();return true}).catch(function(e){toast(e.message,"error");return false});
+  });
+}
+function stopTask(id){
+  api("/api/tasks/"+id+"/stop",{method:"POST"}).then(function(){toast("任务已停止","success");load()}).catch(function(e){toast(e.message,"error")});
+}
+function delTask(id){
+  showConfirm("确定删除此任务？",function(){
+    api("/api/tasks/"+id,{method:"DELETE"}).then(function(){toast("已删除","success");load()}).catch(function(e){toast(e.message,"error")});
+  });
+}
+
+// === Import File ===
+function importLocalFile(){
+  var body='<div class="form-group"><label>订阅名称</label><input id="imp-name" class="input" placeholder="我的导入"></div>';
+  body+='<div class="form-group"><label>选择 M3U/TXT 文件</label><input type="file" id="imp-file" accept=".m3u,.m3u8,.txt" class="input" style="padding:8px"></div>';
+  body+='<div class="form-group"><label>User-Agent</label><select id="imp-ua" class="input">';
+  body+='<option value="AptvPlayer/1.4.1">AptvPlayer/1.4.1</option>';
+  body+='<option value="Mozilla/5.0">Mozilla/5.0</option>';
+  body+='</select></div>';
+  body+='<p class="text-sm text-muted">支持 M3U、M3U8、TXT 格式的播放列表文件</p>';
+  showModal("导入本地文件",body,function(){
+    var n=document.getElementById("imp-name").value;
+    var f=document.getElementById("imp-file").files[0];
+    if(!n||!f){toast("请填写名称并选择文件","error");return false}
+    return new Promise(function(resolve){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        api("/subscriptions/import",{method:"POST",body:JSON.stringify({name:n,content:e.target.result,user_agent:document.getElementById("imp-ua").value})}).then(function(r){
+          if(r.success){toast("导入成功: "+r.channel_count+" 个频道","success");load();resolve(true)}
+          else{toast(r.error||"导入失败","error");resolve(false)}
+        }).catch(function(err){toast(err.message,"error");resolve(false)});
+      };
+      reader.readAsText(f);
+    });
+  });
+}
+
 // === Event Delegation ===
 document.addEventListener("click",function(e){
   var t=e.target;
   var action=t.getAttribute("data-action");
   if(!action)return;
   var id=parseInt(t.getAttribute("data-id"))||0;
+  var strId=t.getAttribute("data-id")||"";
   var slug=t.getAttribute("data-slug")||"";
   var mode=t.getAttribute("data-mode")||"";
   switch(action){
@@ -761,10 +902,9 @@ document.addEventListener("click",function(e){
     case"edit-out":editOutput(id);break;
     case"del-out":delOutput(id);break;
     case"toggle-out":toggleOutput(id);break;
-    case"layout":break;
-    case"ai-group":break;
-    case"ai-sort":break;
-    case"ai-detect":break;
+    case"edit-task":editTask(strId);break;
+    case"stop-task":stopTask(strId);break;
+    case"del-task":delTask(strId);break;
   }
 });
 

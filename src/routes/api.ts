@@ -106,6 +106,45 @@ api.get('/subscriptions/:id/channels', async (c) => {
   return c.json({ success: true, data: channels });
 });
 
+api.post('/subscriptions/import', async (c) => {
+  const body = await c.req.json<{ name: string; content: string; user_agent?: string; auto_update_minutes?: number }>();
+  if (!body.name || !body.content) {
+    return c.json({ success: false, error: 'Name and content are required' }, 400);
+  }
+
+  const playlist = parseM3U(body.content);
+  if (playlist.channels.length === 0) {
+    return c.json({ success: false, error: 'No channels found in file' }, 400);
+  }
+
+  // Create subscription with a special import URL
+  const sub = await createSubscription(c.env, {
+    name: body.name,
+    url: 'imported://' + Date.now(),
+    user_agent: body.user_agent || 'AptvPlayer/1.4.1',
+    auto_update_minutes: body.auto_update_minutes || 0,
+  });
+
+  // Insert channels
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < playlist.channels.length; i += BATCH_SIZE) {
+    const batch = playlist.channels.slice(i, i + BATCH_SIZE);
+    const stmts = batch.map((ch) =>
+      c.env.DB.prepare(
+        'INSERT INTO channels (subscription_id, name, url, "group", logo, tvg_id, tvg_name) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      ).bind(sub.id, ch.name, ch.url, ch.group_title, ch.tvg_logo, ch.tvg_id, ch.tvg_name)
+    );
+    await c.env.DB.batch(stmts);
+  }
+
+  await updateSubscription(c.env, sub.id, {
+    last_updated: new Date().toISOString(),
+    last_update_status: `Imported (${playlist.channels.length} channels)`,
+  });
+
+  return c.json({ success: true, data: sub, channel_count: playlist.channels.length }, 201);
+});
+
 api.post('/subscriptions/:id/refresh', async (c) => {
   const id = Number(c.req.param('id'));
   const sub = await getSubscription(c.env, id);
@@ -395,6 +434,20 @@ api.get('/api/tasks', async (c) => {
 api.post('/api/tasks/:id/stop', async (c) => {
   const id = c.req.param('id');
   await updateTask(c.env, id, { status: 'canceled' });
+  return c.json({ success: true });
+});
+
+api.put('/api/tasks/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json<{ name?: string; status?: string; is_shown?: number }>();
+  await updateTask(c.env, id, body);
+  return c.json({ success: true });
+});
+
+api.delete('/api/tasks/:id', async (c) => {
+  const id = c.req.param('id');
+  const deleted = await deleteTask(c.env, id);
+  if (!deleted) return c.json({ success: false, error: 'Task not found' }, 404);
   return c.json({ success: true });
 });
 
