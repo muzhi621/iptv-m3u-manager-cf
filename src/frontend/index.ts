@@ -915,15 +915,15 @@ function copyLink(url){navigator.clipboard.writeText(url).then(function(){toast(
 function showQrModal(slug,name){
   var base=location.origin;
   var formats=[
-    {label:"M3U",path:"/m3u/",desc:"标准格式 (VLC/PotPlayer/APTV)"},
-    {label:"TXT",path:"/txt/",desc:"酷9/电视家/DIYP"},
-    {label:"M3U8",path:"/simple/",desc:"简洁格式 (兼容性好)"},
-    {label:"JSON",path:"/json/",desc:"TVBox/影视仓"}
+    {label:"M3U",path:"/m3u/",ext:".m3u",desc:"标准格式 (VLC/PotPlayer/APTV)"},
+    {label:"TXT",path:"/txt/",ext:".txt",desc:"酷9/电视家/DIYP"},
+    {label:"M3U8",path:"/simple/",ext:".m3u8",desc:"简洁格式 (兼容性好)"},
+    {label:"JSON",path:"/json/",ext:".json",desc:"TVBox/影视仓"}
   ];
   var body='<div style="text-align:center"><p style="margin-bottom:16px;font-size:15px;font-weight:600">'+esc(name)+'</p>';
   body+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
   formats.forEach(function(f){
-    var url=base+f.path+slug;
+    var url=base+f.path+slug+f.ext;
     var qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+encodeURIComponent(url);
     body+='<div style="border:1px solid var(--border);border-radius:8px;padding:12px">';
     body+='<div style="font-weight:600;font-size:13px;margin-bottom:6px">'+f.label+'</div>';
