@@ -352,7 +352,15 @@ function renderOutputs(c){
     S.outs.forEach(function(o){
       h+='<div class="list-item">';
       h+='<div class="list-item-header"><div class="list-item-title">'+esc(o.name)+' <span class="badge '+(o.is_enabled?"badge-ok":"badge-err")+'">'+(o.is_enabled?"运行中":"已禁用")+'</span></div></div>';
-      h+='<div class="list-item-url">'+location.origin+'/m3u/'+esc(o.slug)+' <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;margin-left:8px" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制</button> <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px" data-action="qr-out" data-slug="'+esc(o.slug)+'" data-name="'+esc(o.name)+'">\\u{1F4F1} 二维码</button></div>';
+      var base=location.origin;
+      h+='<div style="margin-bottom:6px">';
+      h+='<div class="list-item-url">'+base+'/m3u/'+esc(o.slug)+' <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;margin-left:8px" data-action="copy-link" data-url="'+base+'/m3u/'+esc(o.slug)+'">复制</button></div>';
+      h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">';
+      h+='<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="copy-link" data-url="'+base+'/txt/'+esc(o.slug)+'" title="酷9/电视家/DIYP">TXT 格式</button>';
+      h+='<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="copy-link" data-url="'+base+'/simple/'+esc(o.slug)+'" title="简洁M3U，兼容性更好">M3U8 格式</button>';
+      h+='<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="copy-link" data-url="'+base+'/json/'+esc(o.slug)+'" title="TVBox/影视仓">JSON 格式</button>';
+      h+='<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="qr-out" data-slug="'+esc(o.slug)+'" data-name="'+esc(o.name)+'">\\u{1F4F1} 二维码</button>';
+      h+='</div></div>';
       h+='<div class="list-item-meta">';
       h+=(o.filter_regex&&o.filter_regex!==".*"?"正则: "+esc(o.filter_regex)+" | ":"");
       h+='\\u{1F4FA} 频道: '+(o.member_total||0)+' 总计  \\u{2705} '+(o.member_enabled||0)+' 启用  \\u{274C} '+(o.member_disabled||0)+' 禁用';
@@ -386,7 +394,17 @@ function renderOutputDetail(c){
     p.groups.forEach(function(g){totalChannels+=g.count;g.channels.forEach(function(ch){ch._group=g.name;allChs.push(ch)})});
   }
   var enabledCount=allChs.filter(function(ch){return ch.is_enabled}).length;
-  var h='<div class="flex-between mb-16"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backOutBtn">\\u2190 返回</button><h3>'+esc(o.name)+'</h3></div><div class="flex gap-12"><button class="btn btn-primary btn-sm" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制 M3U 链接</button><button class="btn btn-ghost btn-sm" data-action="qr-out" data-slug="'+esc(o.slug)+'" data-name="'+esc(o.name)+'">\\u{1F4F1} 二维码</button></div></div>';
+  var base=location.origin;
+  var h='<div class="flex-between mb-8"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backOutBtn">\\u2190 返回</button><h3>'+esc(o.name)+'</h3></div></div>';
+  h+='<div style="background:rgba(79,70,229,.03);border-radius:8px;padding:10px 14px;margin-bottom:12px">';
+  h+='<div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text2)">\\u{1F517} 订阅链接（点击复制）</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">';
+  h+='<button class="btn btn-primary btn-sm" data-action="copy-link" data-url="'+base+'/m3u/'+esc(o.slug)+'" title="标准M3U格式">M3U</button>';
+  h+='<button class="btn btn-ghost btn-sm" data-action="copy-link" data-url="'+base+'/txt/'+esc(o.slug)+'" title="酷9/电视家/DIYP">TXT</button>';
+  h+='<button class="btn btn-ghost btn-sm" data-action="copy-link" data-url="'+base+'/simple/'+esc(o.slug)+'" title="简洁M3U，兼容性更好">M3U8</button>';
+  h+='<button class="btn btn-ghost btn-sm" data-action="copy-link" data-url="'+base+'/json/'+esc(o.slug)+'" title="TVBox/影视仓">JSON</button>';
+  h+='<button class="btn btn-ghost btn-sm" data-action="qr-out" data-slug="'+esc(o.slug)+'" data-name="'+esc(o.name)+'">\\u{1F4F1} 二维码</button>';
+  h+='</div></div>';
 
   // Toolbar
   h+='<div class="preview-toolbar">';
@@ -892,6 +910,7 @@ function loadOutputDetail(id){
   }).catch(function(e){toast(e.message,"error")});
 }
 function copyM3uUrl(slug){navigator.clipboard.writeText(location.origin+"/m3u/"+slug).then(function(){toast("M3U 链接已复制","success")}).catch(function(){toast("复制失败","error")})}
+function copyLink(url){navigator.clipboard.writeText(url).then(function(){toast("链接已复制","success")}).catch(function(){toast("复制失败","error")})}
 
 function showQrModal(slug,name){
   var url=location.origin+"/m3u/"+slug;
@@ -969,6 +988,7 @@ document.addEventListener("click",function(e){
     case"preview-out":previewOutput(id);break;
     case"refresh-out":refreshOutput(id);break;
     case"copy-m3u":copyM3uUrl(slug);break;
+    case"copy-link":copyLink(t.getAttribute("data-url")||"");break;
     case"qr-out":showQrModal(slug,t.getAttribute("data-name")||"");break;
     case"edit-out":editOutput(id);break;
     case"del-out":delOutput(id);break;

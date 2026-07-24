@@ -41,13 +41,11 @@ function parseTxt(content: string): M3UPlaylist {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // Group header: "组名,#genre#"
     if (trimmed.endsWith('#genre#')) {
       currentGroup = trimmed.replace(/,#genre#$/, '').trim();
       continue;
     }
 
-    // Channel line: "名称,URL" or "名称#URL"
     const commaMatch = trimmed.match(/^(.+?)[,#](https?:\/\/.+)$/);
     if (commaMatch) {
       channels.push({
@@ -62,7 +60,6 @@ function parseTxt(content: string): M3UPlaylist {
       continue;
     }
 
-    // Pure URL
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       channels.push({
         name: trimmed.split('/').pop() || 'Unknown',
@@ -130,4 +127,50 @@ export function generateM3U(channels: M3UChannel[], title = 'IPTV Playlist'): st
   }
 
   return lines.join('\n');
+}
+
+// TXT format: group,#genre# then name,url per line (酷9/DIYP/电视家 etc.)
+export function generateTxt(channels: M3UChannel[]): string {
+  const groups: Record<string, M3UChannel[]> = {};
+  for (const ch of channels) {
+    const g = ch.group_title || '未分组';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(ch);
+  }
+
+  const lines: string[] = [];
+  for (const [group, chs] of Object.entries(groups)) {
+    lines.push(`${group},#genre#`);
+    for (const ch of chs) {
+      lines.push(`${ch.name},${ch.url}`);
+    }
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+// Simple M3U without extended attributes (wider compatibility for 酷9 etc.)
+export function generateM3USimple(channels: M3UChannel[]): string {
+  const lines: string[] = ['#EXTM3U'];
+
+  for (const ch of channels) {
+    const groupAttr = ch.group_title ? ` group-title="${ch.group_title}"` : '';
+    lines.push(`#EXTINF:-1${groupAttr},${ch.name}`);
+    lines.push(ch.url);
+  }
+
+  return lines.join('\n');
+}
+
+// JSON format for TVBox / 影视仓 etc.
+export function generateJson(channels: M3UChannel[]): string {
+  const groups: Record<string, Array<{ name: string; url: string; logo?: string }>> = {};
+  for (const ch of channels) {
+    const g = ch.group_title || '未分组';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push({ name: ch.name, url: ch.url, logo: ch.tvg_logo || undefined });
+  }
+
+  return JSON.stringify({ channels: groups }, null, 2);
 }

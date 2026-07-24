@@ -6,7 +6,7 @@ import { listOutputSources, getOutputSource, getOutputSourceBySlug, createOutput
 import { getSettings, updateLlmTextConfig, updateLlmVisionConfig, updateAccessPassword, maskApiKey } from '../handlers/settings';
 import { listTasks, getTask, createTask, updateTask, deleteTask, cleanupTasks } from '../handlers/tasks';
 import { getCurrentProgram, batchMatchEpg, syncEpgSources, getEpgSourcesInfo } from '../handlers/epg';
-import { parseM3U, generateM3U } from '../services/m3u-parser';
+import { parseM3U, generateM3U, generateTxt, generateM3USimple, generateJson } from '../services/m3u-parser';
 import { cacheGet, cacheSet, cacheFlush } from '../utils/cache';
 import { checkUrl } from '../services/connectivity';
 import { aiGroup, aiSort, aiVisionCheck } from '../handlers/ai';
@@ -376,6 +376,78 @@ api.get('/m3u/:slug', async (c) => {
     headers: {
       'Content-Type': 'application/x-mpegurl; charset=utf-8',
       'Content-Disposition': `attachment; filename="${slug}.m3u"`,
+    },
+  });
+});
+
+// === M3U Format Variants ===
+
+// Helper to build channels for an output
+async function buildOutputChannels(env: Env, slug: string) {
+  const output = await getOutputSourceBySlug(env, slug);
+  if (!output) return null;
+
+  await updateOutputSource(env, output.id, { last_request_time: new Date().toISOString() });
+
+  const allChannels = await aggregateChannels(env, output);
+  const filtered = await filterChannels(allChannels, output);
+  const overlaidChannels = applyOverlaysToChannels(filtered, output.channel_layout || '{}');
+
+  return {
+    output,
+    channels: overlaidChannels.map((ch) => ({
+      name: ch.name,
+      tvg_id: ch.tvg_id,
+      tvg_name: ch.tvg_name || ch.name,
+      tvg_logo: ch.logo,
+      tvg_chno: '',
+      group_title: ch["group"],
+      url: ch.url,
+    })),
+  };
+}
+
+// TXT format - compatible with 酷9/电视家/DIYP etc.
+api.get('/txt/:slug', async (c) => {
+  const slug = c.req.param('slug');
+  const data = await buildOutputChannels(c.env, slug);
+  if (!data) return c.json({ success: false, error: 'Not found' }, 404);
+
+  const content = generateTxt(data.channels);
+  return new Response(content, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${slug}.txt"`,
+    },
+  });
+});
+
+// Simple M3U - wider compatibility without extended attributes
+api.get('/simple/:slug', async (c) => {
+  const slug = c.req.param('slug');
+  const data = await buildOutputChannels(c.env, slug);
+  if (!data) return c.json({ success: false, error: 'Not found' }, 404);
+
+  const content = generateM3USimple(data.channels);
+  return new Response(content, {
+    headers: {
+      'Content-Type': 'application/x-mpegurl; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${slug}.m3u8"`,
+    },
+  });
+});
+
+// JSON format - for TVBox / 影视仓 etc.
+api.get('/json/:slug', async (c) => {
+  const slug = c.req.param('slug');
+  const data = await buildOutputChannels(c.env, slug);
+  if (!data) return c.json({ success: false, error: 'Not found' }, 404);
+
+  const content = generateJson(data.channels);
+  return new Response(content, {
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${slug}.json"`,
     },
   });
 });
