@@ -284,22 +284,62 @@ function renderSubs(c){
 
 function renderSubChannels(c){
   var sub=S.subs.find(function(x){return x.id===S.selectedSub});
-  var h='<div class="flex-between mb-16"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backSubBtn">\\u2190 返回</button><h3>'+(sub?esc(sub.name):"")+' - 频道列表</h3></div><span class="text-sm text-muted">共 '+S.channels.length+' 个频道</span></div>';
-  h+='<div class="search-bar"><input class="input" id="chSearch" placeholder="搜索频道..."></div>';
-  h+='<div class="card"><table class="table"><thead><tr><th>名称</th><th>分组</th><th>状态</th><th>操作</th></tr></thead><tbody id="ch-list">';
+  // Group channels
+  var groups={};
   S.channels.forEach(function(ch){
-    h+='<tr><td>'+esc(ch.name)+'</td><td>'+esc(ch["group"]||"-")+'</td><td><span class="badge '+(ch.is_enabled?"badge-ok":"badge-err")+'">'+(ch.is_enabled?"启用":"禁用")+'</span></td><td><button class="btn btn-ghost btn-sm" data-action="toggle-ch" data-id="'+ch.id+'">切换</button></td></tr>';
+    var g=ch["group"]||"未分组";
+    if(!groups[g])groups[g]=[];
+    groups[g].push(ch);
   });
-  h+='</tbody></table></div>';
+  var groupNames=Object.keys(groups).sort();
+
+  var h='<div class="flex-between mb-8"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backSubBtn">\\u2190 返回</button><h3 style="font-size:16px">'+(sub?esc(sub.name):"")+'</h3></div><span class="text-sm text-muted">共 '+S.channels.length+' 个频道 / '+groupNames.length+' 个分组</span></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center"><div class="search-bar" style="margin-bottom:0;flex:0 1 320px"><input class="input" id="chSearch" placeholder="搜索频道..." style="padding:8px 12px 8px 32px"></div><button class="btn btn-ghost btn-sm" id="chExpandAll">\\u{1F513} 全部展开</button><button class="btn btn-ghost btn-sm" id="chCollapseAll">\\u{1F512} 全部收起</button></div>';
+
+  groupNames.forEach(function(g){
+    var chs=groups[g];
+    var enabled=chs.filter(function(x){return x.is_enabled}).length;
+    h+='<div class="ch-group" style="margin-bottom:8px">';
+    h+='<div class="ch-group-header" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;user-select:none" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\\'none\\'?\\'\\':\\'none\\';this.querySelector(\\'.ch-arrow\\').textContent=this.nextElementSibling.style.display===\\'none\\'?\\'\\u25B6\\':\\'\\u25BC\\'">';
+    h+='<span class="ch-arrow" style="font-size:10px;color:var(--text2)">\\u{25BC}</span>';
+    h+='<strong style="font-size:13px;flex:1">'+esc(g)+'</strong>';
+    h+='<span class="badge badge-info" style="font-size:11px">'+chs.length+' 频道</span>';
+    h+='<span class="badge badge-ok" style="font-size:11px">'+enabled+' 启用</span>';
+    h+='</div>';
+    h+='<div class="ch-group-body" style="border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden">';
+    chs.forEach(function(ch){
+      h+='<div class="ch-row" data-name="'+esc(ch.name.toLowerCase())+'" style="display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid var(--border);font-size:13px;gap:8px">';
+      h+='<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(ch.name)+'</span>';
+      h+='<span class="badge '+(ch.is_enabled?"badge-ok":"badge-err")+'" style="font-size:11px;flex-shrink:0">'+(ch.is_enabled?"启用":"禁用")+'</span>';
+      h+='<button class="btn '+(ch.is_enabled?"btn-ghost":"btn-success")+' btn-sm" style="padding:3px 10px;font-size:11px;flex-shrink:0" data-action="toggle-ch" data-id="'+ch.id+'">'+(ch.is_enabled?"禁用":"启用")+'</button>';
+      h+='</div>';
+    });
+    h+='</div></div>';
+  });
+
   c.innerHTML=h;
   document.getElementById("backSubBtn").onclick=function(){S.view="subs";render();load()};
   document.getElementById("chSearch").oninput=function(){filterSubChannels(this.value)};
+  document.getElementById("chExpandAll").onclick=function(){document.querySelectorAll(".ch-group-body").forEach(function(el){el.style.display=""});document.querySelectorAll(".ch-arrow").forEach(function(el){el.textContent="\\u{25BC}"})};
+  document.getElementById("chCollapseAll").onclick=function(){document.querySelectorAll(".ch-group-body").forEach(function(el){el.style.display="none"});document.querySelectorAll(".ch-arrow").forEach(function(el){el.textContent="\\u{25B6}"})};
 }
 
 function filterSubChannels(q){
-  var rows=document.querySelectorAll("#ch-list tr");
+  var rows=document.querySelectorAll(".ch-row");
+  var lq=q.toLowerCase();
   for(var i=0;i<rows.length;i++){
-    rows[i].style.display=rows[i].textContent.toLowerCase().indexOf(q.toLowerCase())>=0?"":"none";
+    var match=!lq||rows[i].getAttribute("data-name").indexOf(lq)!==-1||rows[i].textContent.toLowerCase().indexOf(lq)!==-1;
+    rows[i].style.display=match?"":"none";
+  }
+  // Auto-expand groups that have matches
+  if(lq){
+    document.querySelectorAll(".ch-group").forEach(function(g){
+      var hasVisible=false;
+      g.querySelectorAll(".ch-row").forEach(function(r){if(r.style.display!=="none")hasVisible=true});
+      var body=g.querySelector(".ch-group-body");
+      var arrow=g.querySelector(".ch-arrow");
+      if(hasVisible&&body){body.style.display="";if(arrow)arrow.textContent="\\u{25BC}"}
+    });
   }
 }
 
