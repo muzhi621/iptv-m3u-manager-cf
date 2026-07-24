@@ -4,9 +4,7 @@ import api from './routes/api';
 import auth from './routes/auth';
 import { handleWebSocketUpgrade, getConnectionCount } from './services/websocket';
 import { ensureDbInitialized } from './db/init';
-
-// Import HTML from generated module
-import { INDEX_HTML } from './frontend/dist/index';
+import { INDEX_HTML } from './frontend/index';
 
 const app = new Hono<{ Bindings: Env }>();
 

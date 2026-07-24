@@ -8,4 +8,3 @@ dist/
 .env.*
 iptv-m3u-manager-main/
 iptv-m3u-manager-main.zip
-src/frontend/dist/index.ts
