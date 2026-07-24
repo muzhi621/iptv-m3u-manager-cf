@@ -42,7 +42,7 @@ label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(-
 .tab:hover{color:var(--text)}
 .tab.active{border-bottom-color:var(--primary);color:var(--primary)}
 .table{width:100%;border-collapse:collapse}
-.table th,.table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:13px}
+.table th,.table td{padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);font-size:13px}
 .table th{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;background:rgba(79,70,229,.03)}
 .table tr:hover{background:rgba(79,70,229,.03)}
 .table td img.logo{width:24px;height:24px;border-radius:4px;object-fit:contain}
@@ -91,7 +91,7 @@ label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(-
 .sub-type-tab:hover{border-color:var(--primary);color:var(--primary)}
 .sub-type-tab.active{border-color:var(--primary);background:var(--primary);color:#fff}
 .preview-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding:12px;background:rgba(79,70,229,.03);border-radius:8px}
-.preview-toolbar .search-bar{margin-bottom:0;flex:1;min-width:200px}
+.preview-toolbar .search-bar{margin-bottom:0;flex:0 1 280px;min-width:180px}
 .ch-check{width:16px;height:16px;cursor:pointer;accent-color:var(--primary)}
 .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
 .status-ok{background:var(--success)}
@@ -252,6 +252,7 @@ function renderContent(){
   else if(S.view==="tasks")renderTasks(c);
 }
 
+// === Subscriptions List ===
 function renderSubs(c){
   var h='<div class="card-header"><div class="card-title">\\u{1F4E5} 订阅源 ('+S.subs.length+')</div><button class="btn btn-primary" id="addSubBtn">+ 添加订阅源</button></div>';
   if(S.subs.length===0){
@@ -297,6 +298,7 @@ function filterSubChannels(q){
   }
 }
 
+// === Outputs List ===
 function renderOutputs(c){
   var h='<div class="card-header"><div class="card-title">\\u{1F4E6} 聚合源 ('+S.outs.length+')</div><button class="btn btn-primary" id="addOutBtn">+ 创建聚合</button></div>';
   if(S.outs.length===0){
@@ -305,7 +307,7 @@ function renderOutputs(c){
     S.outs.forEach(function(o){
       h+='<div class="list-item">';
       h+='<div class="list-item-header"><div class="list-item-title">'+esc(o.name)+' <span class="badge '+(o.is_enabled?"badge-ok":"badge-err")+'">'+(o.is_enabled?"运行中":"已禁用")+'</span></div></div>';
-      h+='<div class="list-item-url">'+location.origin+'/m3u/'+esc(o.slug)+' <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;margin-left:8px" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制</button></div>';
+      h+='<div class="list-item-url">'+location.origin+'/m3u/'+esc(o.slug)+' <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;margin-left:8px" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制</button> <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px" data-action="qr-out" data-slug="'+esc(o.slug)+'" data-name="'+esc(o.name)+'">\\u{1F4F1} 二维码</button></div>';
       h+='<div class="list-item-meta">';
       h+=(o.filter_regex&&o.filter_regex!==".*"?"正则: "+esc(o.filter_regex)+" | ":"");
       h+='\\u{1F4FA} 频道: '+(o.member_total||0)+' 总计  \\u{2705} '+(o.member_enabled||0)+' 启用  \\u{274C} '+(o.member_disabled||0)+' 禁用';
@@ -328,6 +330,7 @@ function renderOutputs(c){
   document.getElementById("addOutBtn").onclick=function(){showAddOutputModal()};
 }
 
+// === Output Detail (Preview with Channel Selection) ===
 function renderOutputDetail(c){
   var o=S.outputDetail;
   var p=S.preview;
@@ -338,8 +341,9 @@ function renderOutputDetail(c){
     p.groups.forEach(function(g){totalChannels+=g.count;g.channels.forEach(function(ch){ch._group=g.name;allChs.push(ch)})});
   }
   var enabledCount=allChs.filter(function(ch){return ch.is_enabled}).length;
-  var h='<div class="flex-between mb-16"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backOutBtn">\\u2190 返回</button><h3>'+esc(o.name)+'</h3></div><div class="flex gap-12"><button class="btn btn-primary btn-sm" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制 M3U 链接</button></div></div>';
+  var h='<div class="flex-between mb-16"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backOutBtn">\\u2190 返回</button><h3>'+esc(o.name)+'</h3></div><div class="flex gap-12"><button class="btn btn-primary btn-sm" data-action="copy-m3u" data-slug="'+esc(o.slug)+'">复制 M3U 链接</button><button class="btn btn-ghost btn-sm" data-action="qr-out" data-slug="'+esc(o.slug)+'" data-name="'+esc(o.name)+'">\\u{1F4F1} 二维码</button></div></div>';
 
+  // Toolbar
   h+='<div class="preview-toolbar">';
   h+='<div class="search-bar"><input class="input" id="previewSearch" placeholder="搜索频道名称..."></div>';
   h+='<label style="display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap"><input type="checkbox" id="autoToggleChk" class="ch-check"> 根据结果自动启用/禁用</label>';
@@ -347,6 +351,7 @@ function renderOutputDetail(c){
   h+='<button class="btn btn-danger btn-sm" id="deepDetectBtn">\\u{1F4FA} 深度检测</button>';
   h+='</div>';
 
+  // Selection controls
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">';
   h+='<button class="btn btn-primary btn-sm" id="selectAllBtn">全选</button>';
   h+='<button class="btn btn-ghost btn-sm" id="invertSelectBtn">反选</button>';
@@ -356,6 +361,7 @@ function renderOutputDetail(c){
   h+='<button class="btn btn-danger btn-sm" id="disableSelectedBtn">禁用选中</button>';
   h+='</div>';
 
+  // Channel table
   h+='<div class="card" style="padding:0;overflow-x:auto"><table class="table" id="previewTable"><thead><tr>';
   h+='<th style="width:40px"><input type="checkbox" id="checkAll" class="ch-check"></th>';
   h+='<th style="width:40px">Logo</th>';
@@ -387,6 +393,7 @@ function renderOutputDetail(c){
 
   h+='</tbody></table></div>';
 
+  // Footer stats
   h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;color:var(--text2);font-size:13px">';
   h+='<span>共 '+totalChannels+' 个频道 / 已启用 '+enabledCount+' 个 (已选 <span id="selectedCount">'+enabledCount+'</span> 个)</span>';
   h+='</div>';
@@ -394,9 +401,11 @@ function renderOutputDetail(c){
   c.innerHTML=h;
   document.getElementById("backOutBtn").onclick=function(){S.view="outs";render();load()};
 
+  // Search filter
   var ps=document.getElementById("previewSearch");
   if(ps)ps.oninput=function(){filterPreviewTable(this.value)};
 
+  // Check all
   var checkAll=document.getElementById("checkAll");
   if(checkAll)checkAll.onchange=function(){
     var checked=this.checked;
@@ -404,12 +413,15 @@ function renderOutputDetail(c){
     updateSelectedCount();
   };
 
+  // Select all
   var selAllBtn=document.getElementById("selectAllBtn");
   if(selAllBtn)selAllBtn.onclick=function(){document.querySelectorAll(".ch-select").forEach(function(cb){cb.checked=true});updateSelectedCount()};
 
+  // Invert
   var invBtn=document.getElementById("invertSelectBtn");
   if(invBtn)invBtn.onclick=function(){document.querySelectorAll(".ch-select").forEach(function(cb){cb.checked=!cb.checked});updateSelectedCount()};
 
+  // Select enabled
   var selEnBtn=document.getElementById("selectEnabledBtn");
   if(selEnBtn)selEnBtn.onclick=function(){
     allChs.forEach(function(ch){
@@ -419,6 +431,7 @@ function renderOutputDetail(c){
     updateSelectedCount();
   };
 
+  // Select disabled
   var selDisBtn=document.getElementById("selectDisabledBtn");
   if(selDisBtn)selDisBtn.onclick=function(){
     allChs.forEach(function(ch){
@@ -428,25 +441,91 @@ function renderOutputDetail(c){
     updateSelectedCount();
   };
 
+  // Enable selected
   var enSelBtn=document.getElementById("enableSelectedBtn");
   if(enSelBtn)enSelBtn.onclick=function(){batchToggleChannels(true)};
 
+  // Disable selected
   var disSelBtn=document.getElementById("disableSelectedBtn");
   if(disSelBtn)disSelBtn.onclick=function(){batchToggleChannels(false)};
 
+  // Individual toggle buttons
   document.querySelectorAll(".ch-toggle-btn").forEach(function(btn){
     btn.onclick=function(){toggleChannel(parseInt(this.getAttribute("data-id")))}
   });
 
+  // Update count on checkbox change
   document.querySelectorAll(".ch-select").forEach(function(cb){
     cb.onchange=function(){updateSelectedCount()};
   });
 
+  // Quick detect - check connectivity of selected channels
   var qdBtn=document.getElementById("quickDetectBtn");
-  if(qdBtn)qdBtn.onclick=function(){toast("快速检测功能开发中","info")};
+  if(qdBtn)qdBtn.onclick=function(){
+    var ids=[];
+    document.querySelectorAll(".ch-select:checked").forEach(function(cb){ids.push(parseInt(cb.getAttribute("data-id")))});
+    if(ids.length===0){toast("请先选择要检测的频道","error");return}
+    toast("快速检测 "+ids.length+" 个频道...","info");
+    var chMap={};
+    allChs.forEach(function(ch){chMap[ch.id]=ch});
+    var done=0;
+    ids.forEach(function(id){
+      var ch=chMap[id];
+      if(!ch){done++;return}
+      api("/check-connectivity",{method:"POST",body:JSON.stringify({url:ch.url})}).then(function(r){
+        var row=document.querySelector('tr[data-ch-id="'+id+'"]');
+        if(row){
+          var statusCell=row.querySelectorAll("td")[6];
+          if(statusCell){
+            if(r.data&&r.data.ok){
+              statusCell.innerHTML='<span class="status-dot status-ok"></span>\\u{2705} '+r.data.ms+'ms';
+            }else{
+              statusCell.innerHTML='<span class="status-dot status-fail"></span>\\u{274C} 失败';
+            }
+          }
+        }
+        done++;
+        if(done===ids.length)toast("检测完成","success");
+      }).catch(function(){
+        done++;
+        if(done===ids.length)toast("检测完成","success");
+      });
+    });
+  };
 
+  // Deep detect - same as quick but with more detail
   var ddBtn=document.getElementById("deepDetectBtn");
-  if(ddBtn)ddBtn.onclick=function(){toast("深度检测功能开发中","info")};
+  if(ddBtn)ddBtn.onclick=function(){
+    var ids=[];
+    document.querySelectorAll(".ch-select:checked").forEach(function(cb){ids.push(parseInt(cb.getAttribute("data-id")))});
+    if(ids.length===0){toast("请先选择要检测的频道","error");return}
+    toast("深度检测 "+ids.length+" 个频道，请稍候...","info");
+    var chMap={};
+    allChs.forEach(function(ch){chMap[ch.id]=ch});
+    var done=0;
+    ids.forEach(function(id){
+      var ch=chMap[id];
+      if(!ch){done++;return}
+      api("/check-connectivity",{method:"POST",body:JSON.stringify({url:ch.url})}).then(function(r){
+        var row=document.querySelector('tr[data-ch-id="'+id+'"]');
+        if(row){
+          var statusCell=row.querySelectorAll("td")[6];
+          if(statusCell){
+            if(r.data&&r.data.ok){
+              statusCell.innerHTML='<span class="status-dot status-ok"></span>\\u{2705} '+r.data.ms+'ms';
+            }else{
+              statusCell.innerHTML='<span class="status-dot status-fail"></span>\\u{274C} '+(r.data&&r.data.error?r.data.error:"失败");
+            }
+          }
+        }
+        done++;
+        if(done===ids.length)toast("深度检测完成","success");
+      }).catch(function(){
+        done++;
+        if(done===ids.length)toast("深度检测完成","success");
+      });
+    });
+  };
 }
 
 function updateSelectedCount(){
@@ -486,6 +565,7 @@ function renderTasks(c){
   document.getElementById("refreshTasksBtn").onclick=function(){load()};
 }
 
+// === Add Subscription Modal (with tabs) ===
 function showAddSubModal(){
   S.subTypeTab="normal";
   var body='<div class="sub-type-tabs"><div class="sub-type-tab active" id="stab-normal" onclick="window._switchSubTab(\\'normal\\')">\\u{1F517} 普通订阅</div><div class="sub-type-tab" id="stab-git" onclick="window._switchSubTab(\\'git\\')">\\u{1F4C1} Git 仓库</div></div>';
@@ -605,7 +685,30 @@ function showEditOutputModal(id){
   });
 }
 
-function syncSub(id){api("/subscriptions/"+id+"/refresh",{method:"POST"}).then(function(){toast("同步已启动","info");setTimeout(load,2000)}).catch(function(e){toast(e.message,"error")})}
+// === Actions ===
+function syncSub(id){
+  var s=S.subs.find(function(x){return x.id===id});
+  var body='<div class="form-group"><label>同步频次</label><select id="sync-freq" class="input">';
+  body+='<option value="'+(s?s.auto_update_minutes:0)+'">'+(s&&s.auto_update_minutes>0?"当前: 每"+s.auto_update_minutes+"分钟":"当前: 手动刷新")+'</option>';
+  body+='<option value="0">关闭 (手动刷新)</option>';
+  body+='<option value="2">每 2 分钟 (测试用)</option>';
+  body+='<option value="60">每 1 小时</option>';
+  body+='<option value="720">每 12 小时</option>';
+  body+='<option value="1440">每 24 小时</option>';
+  body+='<option value="10080">每 7 天</option>';
+  body+='</select></div>';
+  body+='<p class="text-sm text-muted">选择同步频次后将自动更新订阅源设置并立即同步一次</p>';
+  showModal("同步订阅源",body,function(){
+    var freq=parseInt(document.getElementById("sync-freq").value)||0;
+    var updateP=api("/subscriptions/"+id,{method:"PUT",body:JSON.stringify({auto_update_minutes:freq})});
+    updateP.then(function(){
+      return api("/subscriptions/"+id+"/refresh",{method:"POST"});
+    }).then(function(){
+      toast("同步已启动，频次已更新为: "+(freq>0?"每"+freq+"分钟":"手动刷新"),"success");
+      setTimeout(load,2000);
+    }).catch(function(e){toast(e.message,"error")});
+  });
+}
 function delSub(id){showConfirm("确定删除此订阅源？",function(){api("/subscriptions/"+id,{method:"DELETE"}).then(function(){toast("已删除","success");load()}).catch(function(e){toast(e.message,"error")})})}
 function toggleSub(id){api("/subscriptions/"+id,{method:"PUT",body:JSON.stringify({is_enabled:0})}).then(function(){load()}).catch(function(e){toast(e.message,"error")})}
 function viewSubChannels(id){S.selectedSub=id;S.view="sub-channels";render();api("/subscriptions/"+id+"/channels").then(function(r){S.channels=r.data||[];renderContent()}).catch(function(e){toast(e.message,"error")})}
@@ -629,12 +732,21 @@ function loadOutputDetail(id){
 }
 function copyM3uUrl(slug){navigator.clipboard.writeText(location.origin+"/m3u/"+slug).then(function(){toast("M3U 链接已复制","success")}).catch(function(){toast("复制失败","error")})}
 
+function showQrModal(slug,name){
+  var url=location.origin+"/m3u/"+slug;
+  var qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data="+encodeURIComponent(url);
+  var body='<div style="text-align:center"><p style="margin-bottom:12px;font-size:14px;font-weight:500">'+esc(name)+'</p><img src="'+qrUrl+'" alt="QR Code" style="width:256px;height:256px;border:1px solid var(--border);border-radius:8px"><p style="margin-top:12px;font-size:12px;color:var(--text2);word-break:break-all">'+esc(url)+'</p></div>';
+  showModal("M3U 链接二维码",body,null);
+}
+
+// === Event Delegation ===
 document.addEventListener("click",function(e){
   var t=e.target;
   var action=t.getAttribute("data-action");
   if(!action)return;
   var id=parseInt(t.getAttribute("data-id"))||0;
   var slug=t.getAttribute("data-slug")||"";
+  var mode=t.getAttribute("data-mode")||"";
   switch(action){
     case"sync":syncSub(id);break;
     case"view-ch":viewSubChannels(id);break;
@@ -645,9 +757,14 @@ document.addEventListener("click",function(e){
     case"preview-out":previewOutput(id);break;
     case"refresh-out":refreshOutput(id);break;
     case"copy-m3u":copyM3uUrl(slug);break;
+    case"qr-out":showQrModal(slug,t.getAttribute("data-name")||"");break;
     case"edit-out":editOutput(id);break;
     case"del-out":delOutput(id);break;
     case"toggle-out":toggleOutput(id);break;
+    case"layout":break;
+    case"ai-group":break;
+    case"ai-sort":break;
+    case"ai-detect":break;
   }
 });
 
