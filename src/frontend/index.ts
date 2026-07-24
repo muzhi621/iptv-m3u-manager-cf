@@ -200,7 +200,11 @@ function showModal(title,body,onConfirm,onOpen){
   confirmBtn.onclick=function(){
     if(onConfirm){
       var r=onConfirm();
-      if(r!==false)m.remove();
+      if(r&&typeof r.then==="function"){
+        confirmBtn.disabled=true;
+        confirmBtn.textContent="处理中...";
+        r.then(function(ok){if(ok!==false)m.remove()}).catch(function(e){toast(e.message||"操作失败","error")}).finally(function(){confirmBtn.disabled=false;confirmBtn.textContent="确定"});
+      }else if(r!==false)m.remove();
     }else m.remove();
   };
   foot.appendChild(cancelBtn);
@@ -659,7 +663,7 @@ function showAddOutputModal(){
   var body='<div class="form-group"><label>聚合名称</label><input id="m-name" class="input" placeholder="我的聚合"></div>';
   body+='<div class="form-group"><label>URL 标识 (slug)</label><input id="m-slug" class="input" placeholder="my-aggregate"></div>';
   body+='<div class="form-group"><label>关联订阅源</label><div id="m-subs"></div></div>';
-  body+='<div class="form-group" id="m-ch-wrap" style="display:none"><label>选择频道 <span class="text-muted text-xs">(取消勾选的频道将被排除)</span></label><div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px" id="m-channels"></div><div style="margin-top:6px"><button type="button" class="btn btn-ghost btn-sm" id="m-ch-sel-all">全选</button> <button type="button" class="btn btn-ghost btn-sm" id="m-ch-desel-all">全不选</button></div></div>';
+  body+='<div class="form-group" id="m-ch-wrap" style="display:none"><label style="display:flex;align-items:center;gap:8px;cursor:pointer" id="m-ch-toggle">\\u{1F4E5} 选择频道 <span class="text-muted text-xs">(取消勾选的频道将被排除)</span> <span class="text-xs" style="color:var(--primary)" id="m-ch-arrow">\\u{25B6} 点击展开</span></label><div style="display:none;border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px;max-height:300px;overflow-y:auto" id="m-channels"></div><div style="margin-top:6px;display:none" id="m-ch-actions"><button type="button" class="btn btn-ghost btn-sm" id="m-ch-sel-all">全选</button> <button type="button" class="btn btn-ghost btn-sm" id="m-ch-desel-all">全不选</button> <span class="text-xs text-muted" id="m-ch-count"></span></div></div>';
   body+='<div class="form-group"><label>EPG 链接</label><input id="m-epg" class="input" placeholder="https://example.com/epg.xml"></div>';
   body+='<div class="form-row"><div class="form-group"><label>来源后缀</label><select id="m-suffix" class="input"><option value="0">否</option><option value="1">是</option></select></div><div class="form-group"><label>正则过滤</label><input id="m-regex" class="input" value=".*"></div></div>';
   showModal("创建聚合源",body,function(){
@@ -693,15 +697,19 @@ function loadOutputChannels(){
   document.querySelectorAll(".sub-cb:checked").forEach(function(cb){subIds.push(parseInt(cb.value))});
   var wrap=document.getElementById("m-ch-wrap");
   var container=document.getElementById("m-channels");
+  var actions=document.getElementById("m-ch-actions");
+  var arrow=document.getElementById("m-ch-arrow");
+  var countEl=document.getElementById("m-ch-count");
   if(subIds.length===0){wrap.style.display="none";return}
   wrap.style.display="";
   container.innerHTML='<div class="text-sm text-muted">加载中...</div>';
-  // Fetch channels for all selected subscriptions
+  container.style.display="none";
+  actions.style.display="none";
+  if(arrow)arrow.textContent="\\u{25B6} 点击展开";
   var promises=subIds.map(function(id){return api("/subscriptions/"+id+"/channels").then(function(r){return r.data||[]}).catch(function(){return[]})});
   Promise.all(promises).then(function(results){
     var allChs=[];
-    results.forEach(function(chs){allChs=chs.concat(allChs)});
-    // Sort by group then name
+    results.forEach(function(chs){allChs=chs.concat(chs)});
     allChs.sort(function(a,b){var g=(a["group"]||"").localeCompare(b["group"]||"");return g!==0?g:a.name.localeCompare(b.name)});
     var h='';
     var lastGroup='';
@@ -711,6 +719,15 @@ function loadOutputChannels(){
       h+='<label class="ch-item" data-ch-id="'+ch.id+'" style="display:flex;align-items:center;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" value="'+ch.id+'" checked> <span style="margin-left:6px">'+esc(ch.name)+'</span></label>';
     });
     container.innerHTML=h||'<div class="text-muted text-sm">无频道数据</div>';
+    if(countEl)countEl.textContent="共 "+allChs.length+" 个频道";
+    // Bind toggle
+    var toggle=document.getElementById("m-ch-toggle");
+    if(toggle)toggle.onclick=function(){
+      var isOpen=container.style.display!=="none";
+      container.style.display=isOpen?"none":"";
+      actions.style.display=isOpen?"none":"";
+      if(arrow)arrow.textContent=isOpen?"\\u{25B6} 点击展开":"\\u{25BC} 点击收起";
+    };
   });
 }
 
@@ -720,7 +737,7 @@ function showEditOutputModal(id){
   var body='<div class="form-group"><label>聚合名称</label><input id="m-name" class="input" value="'+esc(o.name)+'"></div>';
   body+='<div class="form-group"><label>URL 标识</label><input id="m-slug" class="input" value="'+esc(o.slug)+'"></div>';
   body+='<div class="form-group"><label>关联订阅源</label><div id="m-subs"></div></div>';
-  body+='<div class="form-group" id="m-ch-wrap" style="display:none"><label>选择频道 <span class="text-muted text-xs">(取消勾选的频道将被排除)</span></label><div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px" id="m-channels"></div><div style="margin-top:6px"><button type="button" class="btn btn-ghost btn-sm" id="m-ch-sel-all">全选</button> <button type="button" class="btn btn-ghost btn-sm" id="m-ch-desel-all">全不选</button></div></div>';
+  body+='<div class="form-group" id="m-ch-wrap" style="display:none"><label style="display:flex;align-items:center;gap:8px;cursor:pointer" id="m-ch-toggle">\\u{1F4E5} 选择频道 <span class="text-muted text-xs">(取消勾选的频道将被排除)</span> <span class="text-xs" style="color:var(--primary)" id="m-ch-arrow">\\u{25B6} 点击展开</span></label><div style="display:none;border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px;max-height:300px;overflow-y:auto" id="m-channels"></div><div style="margin-top:6px;display:none" id="m-ch-actions"><button type="button" class="btn btn-ghost btn-sm" id="m-ch-sel-all">全选</button> <button type="button" class="btn btn-ghost btn-sm" id="m-ch-desel-all">全不选</button> <span class="text-xs text-muted" id="m-ch-count"></span></div></div>';
   body+='<div class="form-group"><label>EPG 链接</label><input id="m-epg" class="input" value="'+esc(o.epg_url||"")+'"></div>';
   body+='<div class="form-row"><div class="form-group"><label>来源后缀</label><select id="m-suffix" class="input"><option value="0"'+(!o.include_source_suffix?" selected":"")+'>否</option><option value="1"'+(o.include_source_suffix?" selected":"")+'>是</option></select></div><div class="form-group"><label>正则过滤</label><input id="m-regex" class="input" value="'+esc(o.filter_regex||".*")+'"></div></div>';
   body+='<div class="form-group"><label>关键字筛选 (JSON)</label><textarea id="m-keywords" class="input">'+esc(o.keywords||"[]")+'</textarea></div>';
@@ -755,13 +772,19 @@ function loadOutputChannelsForEdit(excludedIds){
   document.querySelectorAll(".sub-cb:checked").forEach(function(cb){subIds.push(parseInt(cb.value))});
   var wrap=document.getElementById("m-ch-wrap");
   var container=document.getElementById("m-channels");
+  var actions=document.getElementById("m-ch-actions");
+  var arrow=document.getElementById("m-ch-arrow");
+  var countEl=document.getElementById("m-ch-count");
   if(subIds.length===0){wrap.style.display="none";return}
   wrap.style.display="";
   container.innerHTML='<div class="text-sm text-muted">加载中...</div>';
+  container.style.display="none";
+  actions.style.display="none";
+  if(arrow)arrow.textContent="\\u{25B6} 点击展开";
   var promises=subIds.map(function(id){return api("/subscriptions/"+id+"/channels").then(function(r){return r.data||[]}).catch(function(){return[]})});
   Promise.all(promises).then(function(results){
     var allChs=[];
-    results.forEach(function(chs){allChs=chs.concat(allChs)});
+    results.forEach(function(chs){allChs=chs.concat(chs)});
     allChs.sort(function(a,b){var g=(a["group"]||"").localeCompare(b["group"]||"");return g!==0?g:a.name.localeCompare(b.name)});
     var h='';
     var lastGroup='';
@@ -772,6 +795,14 @@ function loadOutputChannelsForEdit(excludedIds){
       h+='<label class="ch-item" data-ch-id="'+ch.id+'" style="display:flex;align-items:center;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" value="'+ch.id+'"'+(isChecked?" checked":"")+'> <span style="margin-left:6px">'+esc(ch.name)+'</span></label>';
     });
     container.innerHTML=h||'<div class="text-muted text-sm">无频道数据</div>';
+    if(countEl)countEl.textContent="共 "+allChs.length+" 个频道 (已排除 "+excludedIds.length+" 个)";
+    var toggle=document.getElementById("m-ch-toggle");
+    if(toggle)toggle.onclick=function(){
+      var isOpen=container.style.display!=="none";
+      container.style.display=isOpen?"none":"";
+      actions.style.display=isOpen?"none":"";
+      if(arrow)arrow.textContent=isOpen?"\\u{25B6} 点击展开":"\\u{25BC} 点击收起";
+    };
   });
 }
 
