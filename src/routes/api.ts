@@ -330,7 +330,7 @@ api.get('/outputs/:id/overlay-stats', async (c) => {
 
 // === M3U Export (Public) ===
 api.get('/m3u/:slug', async (c) => {
-  const slug = c.req.param('slug');
+  const slug = c.req.param('slug').replace(/\.\w+$/, '');
 
   const output = await getOutputSourceBySlug(c.env, slug);
   if (!output) return c.json({ success: false, error: 'Not found' }, 404);
@@ -409,7 +409,7 @@ async function buildOutputChannels(env: Env, slug: string) {
 
 // TXT format - compatible with 酷9/电视家/DIYP etc.
 api.get('/txt/:slug', async (c) => {
-  const slug = c.req.param('slug');
+  const slug = c.req.param('slug').replace(/\.\w+$/, '');
   const data = await buildOutputChannels(c.env, slug);
   if (!data) return c.json({ success: false, error: 'Not found' }, 404);
 
@@ -424,7 +424,7 @@ api.get('/txt/:slug', async (c) => {
 
 // Simple M3U - wider compatibility without extended attributes
 api.get('/simple/:slug', async (c) => {
-  const slug = c.req.param('slug');
+  const slug = c.req.param('slug').replace(/\.\w+$/, '');
   const data = await buildOutputChannels(c.env, slug);
   if (!data) return c.json({ success: false, error: 'Not found' }, 404);
 
@@ -439,7 +439,7 @@ api.get('/simple/:slug', async (c) => {
 
 // JSON format - for TVBox / 影视仓 etc.
 api.get('/json/:slug', async (c) => {
-  const slug = c.req.param('slug');
+  const slug = c.req.param('slug').replace(/\.\w+$/, '');
   const data = await buildOutputChannels(c.env, slug);
   if (!data) return c.json({ success: false, error: 'Not found' }, 404);
 

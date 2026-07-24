@@ -353,12 +353,12 @@ function renderOutputs(c){
       h+='<div class="list-item">';
       h+='<div class="list-item-header"><div class="list-item-title">'+esc(o.name)+' <span class="badge '+(o.is_enabled?"badge-ok":"badge-err")+'">'+(o.is_enabled?"运行中":"已禁用")+'</span></div></div>';
       var base=location.origin;
-      h+='<div style="margin-bottom:6px">';
-      h+='<div class="list-item-url">'+base+'/m3u/'+esc(o.slug)+' <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;margin-left:8px" data-action="copy-link" data-url="'+base+'/m3u/'+esc(o.slug)+'">复制</button></div>';
-      h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">';
-      h+='<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="copy-link" data-url="'+base+'/txt/'+esc(o.slug)+'" title="酷9/电视家/DIYP">TXT 格式</button>';
-      h+='<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="copy-link" data-url="'+base+'/simple/'+esc(o.slug)+'" title="简洁M3U，兼容性更好">M3U8 格式</button>';
-      h+='<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="copy-link" data-url="'+base+'/json/'+esc(o.slug)+'" title="TVBox/影视仓">JSON 格式</button>';
+      h+='<div style="margin-bottom:8px">';
+      h+='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">';
+      h+='<a href="'+base+'/m3u/'+esc(o.slug)+'.m3u" target="_blank" style="font-size:12px;color:var(--primary);text-decoration:none;font-family:monospace;background:rgba(79,70,229,.05);padding:4px 8px;border-radius:4px">'+esc(o.slug)+'.m3u</a>';
+      h+='<a href="'+base+'/txt/'+esc(o.slug)+'.txt" target="_blank" style="font-size:12px;color:var(--primary);text-decoration:none;font-family:monospace;background:rgba(79,70,229,.05);padding:4px 8px;border-radius:4px">'+esc(o.slug)+'.txt</a>';
+      h+='<a href="'+base+'/simple/'+esc(o.slug)+'.m3u8" target="_blank" style="font-size:12px;color:var(--primary);text-decoration:none;font-family:monospace;background:rgba(79,70,229,.05);padding:4px 8px;border-radius:4px">'+esc(o.slug)+'.m3u8</a>';
+      h+='<a href="'+base+'/json/'+esc(o.slug)+'.json" target="_blank" style="font-size:12px;color:var(--primary);text-decoration:none;font-family:monospace;background:rgba(79,70,229,.05);padding:4px 8px;border-radius:4px">'+esc(o.slug)+'.json</a>';
       h+='<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="qr-out" data-slug="'+esc(o.slug)+'" data-name="'+esc(o.name)+'">\\u{1F4F1} 二维码</button>';
       h+='</div></div>';
       h+='<div class="list-item-meta">';
@@ -397,12 +397,12 @@ function renderOutputDetail(c){
   var base=location.origin;
   var h='<div class="flex-between mb-8"><div class="flex gap-12"><button class="btn btn-ghost btn-sm" id="backOutBtn">\\u2190 返回</button><h3>'+esc(o.name)+'</h3></div></div>';
   h+='<div style="background:rgba(79,70,229,.03);border-radius:8px;padding:10px 14px;margin-bottom:12px">';
-  h+='<div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text2)">\\u{1F517} 订阅链接（点击复制）</div>';
+  h+='<div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text2)">\\u{1F517} 订阅链接（点击复制，新窗口预览）</div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">';
-  h+='<button class="btn btn-primary btn-sm" data-action="copy-link" data-url="'+base+'/m3u/'+esc(o.slug)+'" title="标准M3U格式">M3U</button>';
-  h+='<button class="btn btn-ghost btn-sm" data-action="copy-link" data-url="'+base+'/txt/'+esc(o.slug)+'" title="酷9/电视家/DIYP">TXT</button>';
-  h+='<button class="btn btn-ghost btn-sm" data-action="copy-link" data-url="'+base+'/simple/'+esc(o.slug)+'" title="简洁M3U，兼容性更好">M3U8</button>';
-  h+='<button class="btn btn-ghost btn-sm" data-action="copy-link" data-url="'+base+'/json/'+esc(o.slug)+'" title="TVBox/影视仓">JSON</button>';
+  h+='<a href="'+base+'/m3u/'+esc(o.slug)+'.m3u" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none" data-action="copy-link" data-url="'+base+'/m3u/'+esc(o.slug)+'">M3U</a>';
+  h+='<a href="'+base+'/txt/'+esc(o.slug)+'.txt" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none" data-action="copy-link" data-url="'+base+'/txt/'+esc(o.slug)+'">TXT</a>';
+  h+='<a href="'+base+'/simple/'+esc(o.slug)+'.m3u8" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none" data-action="copy-link" data-url="'+base+'/simple/'+esc(o.slug)+'">M3U8</a>';
+  h+='<a href="'+base+'/json/'+esc(o.slug)+'.json" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none" data-action="copy-link" data-url="'+base+'/json/'+esc(o.slug)+'">JSON</a>';
   h+='<button class="btn btn-ghost btn-sm" data-action="qr-out" data-slug="'+esc(o.slug)+'" data-name="'+esc(o.name)+'">\\u{1F4F1} 二维码</button>';
   h+='</div></div>';
 
@@ -913,10 +913,27 @@ function copyM3uUrl(slug){navigator.clipboard.writeText(location.origin+"/m3u/"+
 function copyLink(url){navigator.clipboard.writeText(url).then(function(){toast("链接已复制","success")}).catch(function(){toast("复制失败","error")})}
 
 function showQrModal(slug,name){
-  var url=location.origin+"/m3u/"+slug;
-  var qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data="+encodeURIComponent(url);
-  var body='<div style="text-align:center"><p style="margin-bottom:12px;font-size:14px;font-weight:500">'+esc(name)+'</p><img src="'+qrUrl+'" alt="QR Code" style="width:256px;height:256px;border:1px solid var(--border);border-radius:8px"><p style="margin-top:12px;font-size:12px;color:var(--text2);word-break:break-all">'+esc(url)+'</p></div>';
-  showModal("M3U 链接二维码",body,null);
+  var base=location.origin;
+  var formats=[
+    {label:"M3U",path:"/m3u/",desc:"标准格式 (VLC/PotPlayer/APTV)"},
+    {label:"TXT",path:"/txt/",desc:"酷9/电视家/DIYP"},
+    {label:"M3U8",path:"/simple/",desc:"简洁格式 (兼容性好)"},
+    {label:"JSON",path:"/json/",desc:"TVBox/影视仓"}
+  ];
+  var body='<div style="text-align:center"><p style="margin-bottom:16px;font-size:15px;font-weight:600">'+esc(name)+'</p>';
+  body+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+  formats.forEach(function(f){
+    var url=base+f.path+slug;
+    var qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+encodeURIComponent(url);
+    body+='<div style="border:1px solid var(--border);border-radius:8px;padding:12px">';
+    body+='<div style="font-weight:600;font-size:13px;margin-bottom:6px">'+f.label+'</div>';
+    body+='<img src="'+qrUrl+'" alt="'+f.label+'" style="width:160px;height:160px;border-radius:4px"><br>';
+    body+='<div style="font-size:11px;color:var(--text2);margin-top:6px">'+f.desc+'</div>';
+    body+='<div style="font-size:11px;color:var(--primary);word-break:break-all;margin-top:4px;cursor:pointer" onclick="navigator.clipboard.writeText(\''+url+'\').then(function(){alert(\\''+f.label+' 链接已复制\\')})">'+url+'</div>';
+    body+='</div>';
+  });
+  body+='</div></div>';
+  showModal("订阅链接二维码",body,null);
 }
 
 // === Task Actions ===
