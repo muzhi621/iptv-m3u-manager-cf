@@ -929,7 +929,7 @@ function showQrModal(slug,name){
     body+='<div style="font-weight:600;font-size:13px;margin-bottom:6px">'+f.label+'</div>';
     body+='<img src="'+qrUrl+'" alt="'+f.label+'" style="width:160px;height:160px;border-radius:4px"><br>';
     body+='<div style="font-size:11px;color:var(--text2);margin-top:6px">'+f.desc+'</div>';
-    body+='<div style="font-size:11px;color:var(--primary);word-break:break-all;margin-top:4px;cursor:pointer" onclick="navigator.clipboard.writeText(\''+url+'\').then(function(){alert(\\''+f.label+' 链接已复制\\')})">'+url+'</div>';
+    body+='<div style="font-size:11px;color:var(--primary);word-break:break-all;margin-top:4px">'+esc(url)+'</div>';
     body+='</div>';
   });
   body+='</div></div>';
